@@ -15,9 +15,9 @@ jobs:
       - name: Extract issue information
         id: extract
         run: |
-          echo "REPO=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Repository:\n).*' | sed 's/\r$//')" >> $GITHUB_ENV
-          echo "NEW_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Branch Name:\n).*' | sed 's/\r$//')" >> $GITHUB_ENV
-          echo "SOURCE_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Branch:\n).*' | sed 's/\r$//')" >> $GITHUB_ENV
+          echo "REPO=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Repository:\n).*' | sed 's/\r$//')" >> $RELEASE_BRANCH_TOKEN
+          echo "NEW_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Branch Name:\n).*' | sed 's/\r$//')" >> $RELEASE_BRANCH_TOKEN
+          echo "SOURCE_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Branch:\n).*' | sed 's/\r$//')" >> $RELEASE_BRANCH_TOKEN
       
 
       - name: Print extracted variables
@@ -35,3 +35,4 @@ jobs:
           git push origin ${{ env.BRANCH_NAME }}
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_BRANCH_TOKEN }}
+ 
