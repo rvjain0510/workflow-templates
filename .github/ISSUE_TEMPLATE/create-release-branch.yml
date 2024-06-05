@@ -18,7 +18,6 @@ body:
       label: Source Repository
       description: "The repository from which to create the release branch (e.g., `organization/repo-name`)."
       placeholder: "organization/repo-name"
-      required: true
 
   - type: input
     id: branch-name
@@ -26,7 +25,6 @@ body:
       label: Branch Name
       description: "The name of the new release branch."
       placeholder: "release/v1.0.0"
-      required: true
 
   - type: input
     id: source-branch
@@ -34,4 +32,3 @@ body:
       label: Source Branch
       description: "The branch to create the release branch from (e.g., `main` or `develop`)."
       placeholder: "main"
-      required: true
