@@ -6,7 +6,6 @@ on:
 
 jobs:
   create-release-branch:
-    if: contains(join(github.event.issue.labels.*.name, ','), 'workflow')
     runs-on: ubuntu-latest
 
     steps:
