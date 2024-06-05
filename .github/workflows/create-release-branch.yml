@@ -15,7 +15,7 @@ jobs:
       - name: Extract issue information
         id: extract
         run: |
-          echo "REPO=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Repository:\n).*' | sed 's/\r$//')"
+          echo "REPO=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Repository\n)[^\n]*' | tr -d '[:space:]')
           echo "NEW_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Branch Name:\n).*' | sed 's/\r$//')"
           echo "SOURCE_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Branch:\n).*' | sed 's/\r$//')"
             
