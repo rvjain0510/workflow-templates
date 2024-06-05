@@ -2,12 +2,15 @@
 name: Create Release Branch
 
 description: |
-  Please provide the necessary information to create a new release branch.
+  Use this template to request the creation of a new release branch.
 
 labels:
   - create-release-branch
 
 ---
+
+**Instructions**:
+Please fill out the following details to request the creation of a new release branch.
 
 **Source Repository**:
 [Provide the name of the source repository]
