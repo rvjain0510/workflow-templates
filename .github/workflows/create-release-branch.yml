@@ -9,9 +9,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Check out the repository
+      uses: actions/checkout@v2
+
     - name: Print issue labels
       run: |
-        echo "Labels: ${{ toJson(github.event.issue.labels) }}"
+        echo "Labels: ${{ github.event.issue.labels }}"
 
     - name: Extract issue information
       id: extract
@@ -26,17 +29,9 @@ jobs:
         echo "NEW_BRANCH=${{ env.NEW_BRANCH }}"
         echo "SOURCE_BRANCH=${{ env.SOURCE_BRANCH }}"
 
-    - name: Check for valid repository URL
-      if: env.REPO != ''
-      run: echo "Repository URL is set to: ${{ env.REPO }}"
-
-    - name: Check out the repository
-      if: env.REPO != ''
-      run: git clone https://github.com/${{ env.REPO }} repo
-
     - name: Create release branch
-      if: env.REPO != '' && env.NEW_BRANCH != '' && env.SOURCE_BRANCH != ''
       run: |
+        git clone https://github.com/${{ env.REPO }} repo
         cd repo
         git checkout ${{ env.SOURCE_BRANCH }}
         git checkout -b ${{ env.NEW_BRANCH }}
