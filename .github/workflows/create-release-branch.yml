@@ -14,7 +14,7 @@ jobs:
       - name: Extract issue information
         id: extract
         run: |
-          source_repo=$(grep -oP '(?<=Source Repository\n)[^\n]*' <<< "${{ github.event.issue.body }}") || true
+          source_repo=$(grep -oP '(?<=Source Repository:\n).*' <<< "${{ github.event.issue.body }}") || true
           branch_name=$(grep -oP '(?<=Branch Name:\n).*' <<< "${{ github.event.issue.body }}") || true
           source_branch=$(grep -oP '(?<=Source Branch:\n).*' <<< "${{ github.event.issue.body }}") || true
 
