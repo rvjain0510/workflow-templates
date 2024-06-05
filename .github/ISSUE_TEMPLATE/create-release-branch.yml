@@ -32,3 +32,4 @@ body:
       label: Source Branch
       description: "The branch to create the release branch from (e.g., `main` or `develop`)."
       placeholder: "main"
+ 
