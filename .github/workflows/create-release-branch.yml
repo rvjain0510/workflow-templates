@@ -16,9 +16,9 @@ jobs:
     - name: Extract issue information
       id: extract
       run: |
-        echo "REPO=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Repository: ).*' | head -n 1)" >> $GITHUB_ENV
-        echo "NEW_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Branch Name: ).*' | head -n 1)" >> $GITHUB_ENV
-        echo "SOURCE_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Branch: ).*' | head -n 1)" >> $GITHUB_ENV
+        echo "REPO=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Repository\\n---\\n).*(?=\\n)')" >> $GITHUB_ENV
+        echo "NEW_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Branch Name\\n---\\n).*(?=\\n)')" >> $GITHUB_ENV
+        echo "SOURCE_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Branch\\n---\\n).*(?=\\n)')" >> $GITHUB_ENV
 
     - name: Create release branch
       run: |
