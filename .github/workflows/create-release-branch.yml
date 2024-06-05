@@ -1,0 +1,31 @@
+name: Create Release Branch
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  create-release-branch:
+    if: github.event.issue.labels.*.name contains 'workflow'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v2
+
+    - name: Extract issue information
+      id: extract
+      run: |
+        echo "REPO=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Repository: ).*')" >> $GITHUB_ENV
+        echo "NEW_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Branch Name: ).*')" >> $GITHUB_ENV
+        echo "SOURCE_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Branch: ).*')" >> $GITHUB_ENV
+
+    - name: Create release branch
+      run: |
+        git clone https://github.com/${{ env.REPO }} repo
+        cd repo
+        git checkout ${{ env.SOURCE_BRANCH }}
+        git checkout -b ${{ env.NEW_BRANCH }}
+        git push origin ${{ env.NEW_BRANCH }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
