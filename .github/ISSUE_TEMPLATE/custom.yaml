@@ -1,0 +1,19 @@
+---
+name: Create Release Branch
+
+description: |
+  Please provide the necessary information to create a new release branch.
+
+labels:
+  - create-release-branch
+
+---
+
+**Source Repository**:
+[Provide the name of the source repository]
+
+**Branch Name**:
+[Provide the name for the new release branch]
+
+**Source Branch**:
+[Provide the name of the branch you want to create the release branch from]
