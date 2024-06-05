@@ -15,9 +15,9 @@ jobs:
       - name: Extract issue information
         id: extract
         run: |
-          echo "$SOURCE_REPOSITORY" >> $GITHUB_ENV
-          echo "$BRANCH_NAME" >> $GITHUB_ENV
-          echo "$SOURCE_BRANCH" >> $GITHUB_ENV
+          echo "REPO=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Repository\n).*(?=\n)')" >> $GITHUB_ENV
+          echo "NEW_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Branch Name\n).*(?=\n)')" >> $GITHUB_ENV
+          echo "SOURCE_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Branch\n).*(?=\n)')" >> $GITHUB_ENV
 
       - name: Print extracted variables
         run: |
