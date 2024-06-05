@@ -1,27 +1,31 @@
+name: Create Release Branch
+
+on:
+  issues:
+    types: [opened]
+
 jobs:
   create-release-branch:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout the repository
-      uses: actions/checkout@v2
+      - name: Checkout the repository
+        uses: actions/checkout@v2
 
-    - name: Extract issue information
-      id: extract
-      run: |
-        source_repo=$(grep -oP '(?<=Source Repository\n)[^\n]*' <<< "${{ github.event.issue.body }}") || true
-        branch_name=$(grep -oP '(?<=Branch Name:\n).*' <<< "${{ github.event.issue.body }}") || true
-        source_branch=$(grep -oP '(?<=Source Branch:\n).*' <<< "${{ github.event.issue.body }}") || true
+      - name: Extract issue information
+        id: extract
+        run: |
+          source_repo=$(grep -oP '(?<=Source Repository\n)[^\n]*' <<< "${{ github.event.issue.body }}") || true
+          branch_name=$(grep -oP '(?<=Branch Name:\n).*' <<< "${{ github.event.issue.body }}") || true
+          source_branch=$(grep -oP '(?<=Source Branch:\n).*' <<< "${{ github.event.issue.body }}") || true
 
-        if [ -z "$source_repo" ] || [ -z "$branch_name" ] || [ -z "$source_branch" ]; then
-          echo "Missing required information in issue body. Please provide 'Source Repository', 'Branch Name:', and 'Source Branch:'"
-          exit 1
-        fi
+          if [ -z "$source_repo" ] || [ -z "$branch_name" ] || [ -z "$source_branch" ]; then
+            echo "Missing required information in issue body. Please provide 'Source Repository', 'Branch Name:', and 'Source Branch:'"
+            exit 1
+          fi
 
-        echo "SOURCE_REPOSITORY=$source_repo"
-        echo "BRANCH_NAME=$branch_name"
-        echo "SOURCE_BRANCH=$source_branch"
-
-            
+          echo "SOURCE_REPOSITORY=$source_repo"
+          echo "BRANCH_NAME=$branch_name"
+          echo "SOURCE_BRANCH=$source_branch"
 
       - name: Print extracted variables
         run: |
