@@ -9,29 +9,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check out the repository
-      uses: actions/checkout@v2
+      - name: Check out the repository
+        uses: actions/checkout@v2
 
-    - name: Extract issue information
-      id: extract
-      run: |
-        echo "REPO=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Repository\n).*(?=\n)')" >> $GITHUB_ENV
-        echo "NEW_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Branch Name\n).*(?=\n)')" >> $GITHUB_ENV
-        echo "SOURCE_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Branch\n).*(?=\n)')" >> $GITHUB_ENV
+      - name: Extract issue information
+        id: extract
+        run: |
+          echo "REPO=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Repository\n).*(?=\n)')" >> $GITHUB_ENV
+          echo "NEW_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Branch Name\n).*(?=\n)')" >> $GITHUB_ENV
+          echo "SOURCE_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Branch\n).*(?=\n)')" >> $GITHUB_ENV
 
-    - name: Print extracted variables
-      run: |
-        echo "REPO=${{ env.REPO }}"
-        echo "NEW_BRANCH=${{ env.NEW_BRANCH }}"
-        echo "SOURCE_BRANCH=${{ env.SOURCE_BRANCH }}"
+      - name: Print extracted variables
+        run: |
+          echo "REPO=${{ env.REPO }}"
+          echo "NEW_BRANCH=${{ env.NEW_BRANCH }}"
+          echo "SOURCE_BRANCH=${{ env.SOURCE_BRANCH }}"
 
-    - name: Create release branch
-      run: |
-        git clone https://github.com/${{ env.REPO }} repo
-        cd repo
-        git checkout ${{ env.SOURCE_BRANCH }}
-        git checkout -b ${{ env.NEW_BRANCH }}
-        git push origin ${{ env.NEW_BRANCH }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
- 
+      - name: Create release branch
+        run: |
+          git clone https://github.com/${{ env.REPO }} repo
+          cd repo
+          git checkout ${{ env.SOURCE_BRANCH }}
+          git checkout -b ${{ env.NEW_BRANCH }}
+          git push origin ${{ env.NEW_BRANCH }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
