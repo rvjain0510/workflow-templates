@@ -15,22 +15,22 @@ jobs:
       - name: Extract issue information
         id: extract
         run: |
-          echo "REPO=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Repository\n).*(?=\n)')" >> $GITHUB_ENV
-          echo "NEW_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Branch Name\n).*(?=\n)')" >> $GITHUB_ENV
-          echo "SOURCE_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Branch\n).*(?=\n)')" >> $GITHUB_ENV
+          echo "$SOURCE_REPOSITORY" >> $GITHUB_ENV
+          echo "$BRANCH_NAME" >> $GITHUB_ENV
+          echo "$SOURCE_BRANCH" >> $GITHUB_ENV
 
       - name: Print extracted variables
         run: |
-          echo "REPO=${{ env.REPO }}"
-          echo "NEW_BRANCH=${{ env.NEW_BRANCH }}"
+          echo "REPO=${{ env.SOURCE_REPOSITORY }}"
+          echo "NEW_BRANCH=${{ env.BRANCH_NAME }}"
           echo "SOURCE_BRANCH=${{ env.SOURCE_BRANCH }}"
 
       - name: Create release branch
         run: |
-          git clone https://github.com/${{ env.REPO }} repo
+          git clone https://github.com/${{ env.SOURCE_REPOSITORY }} repo
           cd repo
           git checkout ${{ env.SOURCE_BRANCH }}
-          git checkout -b ${{ env.NEW_BRANCH }}
-          git push origin ${{ env.NEW_BRANCH }}
+          git checkout -b ${{ env.BRANCH_NAME }}
+          git push origin ${{ env.BRANCH_NAME }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
