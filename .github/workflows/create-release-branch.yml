@@ -25,9 +25,9 @@ jobs:
           echo "$ISSUE_BODY"
 
           # Extract repository, branch name, and source branch using sed
-          REPO=$(echo "$ISSUE_BODY" | sed -n 's/.*### Source Repository\n\(.*\)/\1/p' | xargs)
-          NEW_BRANCH=$(echo "$ISSUE_BODY" | sed -n 's/.*### Branch Name\n\(.*\)/\1/p' | xargs)
-          SOURCE_BRANCH=$(echo "$ISSUE_BODY" | sed -n 's/.*### Source Branch\n\(.*\)/\1/p' | xargs)
+          REPO=$(echo "$ISSUE_BODY" | sed -n 's/.*Repository\n\s*\(.*\)/\1/p')
+          NEW_BRANCH=$(echo "$ISSUE_BODY" | sed -n 's/.*Branch Name\n\s*\(.*\)/\1/p')
+          SOURCE_BRANCH=$(echo "$ISSUE_BODY" | sed -n 's/.*Source Branch\n\s*\(.*\)/\1/p')
 
           # Debugging step: Print the extracted values to verify correctness
           echo "Extracted REPO: $REPO"
@@ -48,7 +48,7 @@ jobs:
       - name: Create release branch
         run: |
           # Clone the source repository
-          git clone https://github.com/${{ env.SOURCE_REPOSITORY }} 
+          git clone https://github.com/${{ env.SOURCE_REPOSITORY }} repo
           cd repo
 
           # Checkout the source branch
