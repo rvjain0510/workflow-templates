@@ -21,9 +21,12 @@ jobs:
         id: extract
         run: |
           ISSUE_BODY="${{ github.event.issue.body }}"
-          REPO=$(echo "$ISSUE_BODY" | awk '/### Source Repository/{getline; print}')
-          NEW_BRANCH=$(echo "$ISSUE_BODY" | awk '/### Branch Name/{getline; print}')
-          SOURCE_BRANCH=$(echo "$ISSUE_BODY" | awk '/### Source Branch/{getline; print}')
+          echo "ISSUE_BODY content:"
+          echo "$ISSUE_BODY"
+
+          REPO=$(echo "$ISSUE_BODY" | awk '/### Source Repository/{getline; print}' | xargs)
+          NEW_BRANCH=$(echo "$ISSUE_BODY" | awk '/### Branch Name/{getline; print}' | xargs)
+          SOURCE_BRANCH=$(echo "$ISSUE_BODY" | awk '/### Source Branch/{getline; print}' | xargs)
 
           echo "Extracted REPO: $REPO"
           echo "Extracted NEW_BRANCH: $NEW_BRANCH"
