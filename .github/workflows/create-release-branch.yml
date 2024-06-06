@@ -25,7 +25,7 @@ jobs:
           echo "$ISSUE_BODY"
 
           # Extract repository, branch name, and source branch using sed
-          REPO=$(echo "$ISSUE_BODY" | sed -n 's/.*Repository\n\s*\(.*\)/\1/p')
+          REPO=$(echo "$ISSUE_BODY" | sed -n 's/.*Repository \n\s*\(.*\)/\1/p')
           NEW_BRANCH=$(echo "$ISSUE_BODY" | sed -n 's/.*Branch Name\n\s*\(.*\)/\1/p')
           SOURCE_BRANCH=$(echo "$ISSUE_BODY" | sed -n 's/.*Source Branch\n\s*\(.*\)/\1/p')
 
