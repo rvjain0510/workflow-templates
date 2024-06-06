@@ -24,14 +24,10 @@ jobs:
           echo "ISSUE_BODY content:"
           echo "$ISSUE_BODY"
 
-          # Debugging step: Print the issue body to verify its content
-          echo "Issue Body Content:"
-          echo "$ISSUE_BODY"
-
-          # Extract repository, branch name, and source branch
-          REPO=$(echo "$ISSUE_BODY" | awk '/### Source Repository/{getline; print}' | xargs)
-          NEW_BRANCH=$(echo "$ISSUE_BODY" | awk '/### Branch Name/{getline; print}' | xargs)
-          SOURCE_BRANCH=$(echo "$ISSUE_BODY" | awk '/### Source Branch/{getline; print}' | xargs)
+          # Extract repository, branch name, and source branch using sed
+          REPO=$(echo "$ISSUE_BODY" | sed -n 's/.*Source Repository\n\(.*\)/\1/p' | xargs)
+          NEW_BRANCH=$(echo "$ISSUE_BODY" | sed -n 's/.*Branch Name\n\(.*\)/\1/p' | xargs)
+          SOURCE_BRANCH=$(echo "$ISSUE_BODY" | sed -n 's/.*Source Branch\n\(.*\)/\1/p' | xargs)
 
           # Debugging step: Print the extracted values to verify correctness
           echo "Extracted REPO: $REPO"
@@ -51,14 +47,8 @@ jobs:
 
       - name: Create release branch
         run: |
-          # Debugging step: Print current directory to verify repository was checked out
-          pwd
-
-          # Debugging step: Print repository contents to verify it was cloned correctly
-          ls -a
-
           # Clone the source repository
-          git clone https://github.com/${{ env.SOURCE_REPOSITORY }} repo
+          git clone https://github.com/${{ env.SOURCE_REPOSITORY }} 
           cd repo
 
           # Checkout the source branch
