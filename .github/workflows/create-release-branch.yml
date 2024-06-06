@@ -24,12 +24,15 @@ jobs:
           echo "ISSUE_BODY content:"
           echo "$ISSUE_BODY"
 
-          # Extract repository, branch name, and source branch using sed
-          REPO=$(echo "$ISSUE_BODY" | sed -n 's/.*Repository \n\s*\(.*\)/\1/p')
-          NEW_BRANCH=$(echo "$ISSUE_BODY" | sed -n 's/.*Branch Name\n\s*\(.*\)/\1/p')
-          SOURCE_BRANCH=$(echo "$ISSUE_BODY" | sed -n 's/.*Source Branch\n\s*\(.*\)/\1/p')
-
-          # Debugging step: Print the extracted values to verify correctness
+          # Extracting repository
+          REPO=$(echo "$ISSUE_BODY" | sed -n '/^### Source Repository$/,/^$/ { /### Source Repository/d; /^$/d; p }' | xargs)
+          
+          # Extracting branch name
+          NEW_BRANCH=$(echo "$ISSUE_BODY" | sed -n '/^### Branch Name$/,/^$/ { /### Branch Name/d; /^$/d; p }' | xargs)
+          
+          # Extracting source branch
+          SOURCE_BRANCH=$(echo "$ISSUE_BODY" | sed -n '/^### Source Branch$/,/^$/ { /### Source Branch/d; /^$/d; p }' | xargs)
+  
           echo "Extracted REPO: $REPO"
           echo "Extracted NEW_BRANCH: $NEW_BRANCH"
           echo "Extracted SOURCE_BRANCH: $SOURCE_BRANCH"
