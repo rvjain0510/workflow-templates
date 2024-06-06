@@ -15,9 +15,17 @@ jobs:
       - name: Extract issue information
         id: extract
         run: |
-          echo "SOURCE_REPOSITORY=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Repository:\n).*' | sed 's/\r$//')" >> $GITHUB_ENV
-          echo "BRANCH_NAME=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Branch Name:\n).*' | sed 's/\r$//')" >> $GITHUB_ENV
-          echo "SOURCE_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Branch:\n).*' | sed 's/\r$//')" >> $GITHUB_ENV
+          REPO=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Repository:\n).*' | sed 's/\r$//')
+          NEW_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Branch Name:\n).*' | sed 's/\r$//')
+          SOURCE_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Branch:\n).*' | sed 's/\r$//')
+
+          echo "Extracted REPO: $REPO"
+          echo "Extracted NEW_BRANCH: $NEW_BRANCH"
+          echo "Extracted SOURCE_BRANCH: $SOURCE_BRANCH"
+
+          echo "SOURCE_REPOSITORY=$REPO" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$NEW_BRANCH" >> $GITHUB_ENV
+          echo "SOURCE_BRANCH=$SOURCE_BRANCH" >> $GITHUB_ENV
 
       - name: Print extracted variables
         run: |
