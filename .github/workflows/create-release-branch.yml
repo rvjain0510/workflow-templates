@@ -9,40 +9,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Check out the repository
+        uses: actions/checkout@v2
 
-      - name: Check issue body for keywords
+      - name: Extract issue information
+        id: extract
         run: |
-          ISSUE_BODY=${{ github.event.issue.body }}
-          if [[ $ISSUE_BODY =~ "### Source Repository:\s*(.*)" ]]; then
-            SOURCE_REPOSITORY=${BASH_REMATCH[1]}
-          fi
-          if [[ $ISSUE_BODY =~ "### Branch Name:\s*(.*)" ]]; then
-            BRANCH_NAME=${BASH_REMATCH[1]}
-          fi
-          if [[ $ISSUE_BODY =~ "### Source Branch:\s*(.*)" ]]; then
-            SOURCE_BRANCH=${BASH_REMATCH[1]}
-          fi
-
-          echo "Extracted REPO: $SOURCE_REPOSITORY"
-          echo "Extracted NEW_BRANCH: $BRANCH_NAME"
-          echo "Extracted SOURCE_BRANCH: $SOURCE_BRANCH"
+          echo "REPO=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Repository:\n).*' | sed 's/\r$//')" >> $GITHUB_ENV
+          echo "NEW_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Branch Name:\n).*' | sed 's/\r$//')" >> $GITHUB_ENV
+          echo "SOURCE_BRANCH=$(echo '${{ github.event.issue.body }}' | grep -oP '(?<=Source Branch:\n).*' | sed 's/\r$//')" >> $GITHUB_ENV
+      
 
       - name: Print extracted variables
         run: |
-          echo "SOURCE_REPOSITORY=${{ env.SOURCE_REPOSITORY }}"
-          echo "BRANCH_NAME=${{ env.BRANCH_NAME }}"
+          echo "REPO=${{ env.SOURCE_REPOSITORY }}"
+          echo "NEW_BRANCH=${{ env.BRANCH_NAME }}"
           echo "SOURCE_BRANCH=${{ env.SOURCE_BRANCH }}"
 
-      - name: Create release branch (if variables are set)
-        if: ${{ env.SOURCE_REPOSITORY && env.BRANCH_NAME && env.SOURCE_BRANCH }}
+      - name: Create release branch
         run: |
-          # Use the dot (.) operator instead of source
-          . /home/runner/work/_temp/2c469f0c-196a-4329-a1b5-2539e0c336a6.sh  # Assuming this is your custom script
-
-          # Alternatively, if the script allows it, specify the shell interpreter
-          # sh /home/runner/work/_temp/2c469f0c-196a-4329-a1b5-2539e0c336a6.sh  # Example with sh
-
           git clone https://github.com/${{ env.SOURCE_REPOSITORY }} repo
           cd repo
           git checkout ${{ env.SOURCE_BRANCH }}
