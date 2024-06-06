@@ -9,32 +9,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      - name: Print issue body
+      - name: Check issue body for keywords
         run: |
-          echo "Issue Body:"
-          echo "${{ github.event.issue.body }}"
+          ISSUE_BODY=${{ github.event.issue.body }}
+          if [[ $ISSUE_BODY =~ "### Source Repository:\s*(.*)" ]]; then
+            SOURCE_REPOSITORY=${BASH_REMATCH[1]}
+          fi
+          if [[ $ISSUE_BODY =~ "### Branch Name:\s*(.*)" ]]; then
+            BRANCH_NAME=${BASH_REMATCH[1]}
+          fi
+          if [[ $ISSUE_BODY =~ "### Source Branch:\s*(.*)" ]]; then
+            SOURCE_BRANCH=${BASH_REMATCH[1]}
+          fi
 
-      - name: Extract issue information
-        id: extract
-        run: |
-          ISSUE_BODY="${{ github.event.issue.body }}"
-          echo "ISSUE_BODY content:"
-          echo "$ISSUE_BODY"
-
-          REPO=$(echo "$ISSUE_BODY" | awk '/### Source Repository/{getline; print}' | xargs)
-          NEW_BRANCH=$(echo "$ISSUE_BODY" | awk '/### Branch Name/{getline; print}' | xargs)
-          SOURCE_BRANCH=$(echo "$ISSUE_BODY" | awk '/### Source Branch/{getline; print}' | xargs)
-
-          echo "Extracted REPO: $REPO"
-          echo "Extracted NEW_BRANCH: $NEW_BRANCH"
+          echo "Extracted REPO: $SOURCE_REPOSITORY"
+          echo "Extracted NEW_BRANCH: $BRANCH_NAME"
           echo "Extracted SOURCE_BRANCH: $SOURCE_BRANCH"
-
-          echo "SOURCE_REPOSITORY=$REPO" >> $GITHUB_ENV
-          echo "BRANCH_NAME=$NEW_BRANCH" >> $GITHUB_ENV
-          echo "SOURCE_BRANCH=$SOURCE_BRANCH" >> $GITHUB_ENV
 
       - name: Print extracted variables
         run: |
@@ -42,7 +34,8 @@ jobs:
           echo "BRANCH_NAME=${{ env.BRANCH_NAME }}"
           echo "SOURCE_BRANCH=${{ env.SOURCE_BRANCH }}"
 
-      - name: Create release branch
+      - name: Create release branch (if variables are set)
+        if: ${{ env.SOURCE_REPOSITORY && env.BRANCH_NAME && env.SOURCE_BRANCH }}
         run: |
           git clone https://github.com/${{ env.SOURCE_REPOSITORY }} repo
           cd repo
