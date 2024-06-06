@@ -37,6 +37,12 @@ jobs:
       - name: Create release branch (if variables are set)
         if: ${{ env.SOURCE_REPOSITORY && env.BRANCH_NAME && env.SOURCE_BRANCH }}
         run: |
+          # Use the dot (.) operator instead of source
+          . /home/runner/work/_temp/2c469f0c-196a-4329-a1b5-2539e0c336a6.sh  # Assuming this is your custom script
+
+          # Alternatively, if the script allows it, specify the shell interpreter
+          # sh /home/runner/work/_temp/2c469f0c-196a-4329-a1b5-2539e0c336a6.sh  # Example with sh
+
           git clone https://github.com/${{ env.SOURCE_REPOSITORY }} repo
           cd repo
           git checkout ${{ env.SOURCE_BRANCH }}
