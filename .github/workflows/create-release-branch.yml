@@ -49,6 +49,7 @@ jobs:
           # Assign to REPO
           REPO=$FINAL_RESULT
           echo "Extracted Source Repository: $REPO"
+          
           # Extracting repository
           REPO=$(echo "$ISSUE_BODY" | sed -n '/^### Source Repository$/,/^$/ { /### Source Repository/d; /^$/d; p }' | xargs)
           
