@@ -51,6 +51,11 @@ jobs:
           echo "BRANCH_NAME=${{ env.BRANCH_NAME }}"
           echo "SOURCE_BRANCH=${{ env.SOURCE_BRANCH }}"
 
+      - name: Set up Git
+        run: |
+          git config --global user.email "jainrv0510@gmail.com"
+          git config --global user.name "Rishav Jain"   
+
       - name: Create release branch
         run: |
           # Clone the source repository
