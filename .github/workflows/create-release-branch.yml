@@ -25,16 +25,16 @@ jobs:
           echo "$ISSUE_BODY"
 
           # Convert issue body to JSON format
-          ISSUE_JSON=$(echo "$ISSUE_BODY" | jq -R -s '. | split("\n")')
+          ISSUE_JSON=$(echo "$ISSUE_BODY" | jq -R -s 'split("\n") | map(select(. != ""))')
 
           # Extracting repository
-          REPO=$(echo "$ISSUE_JSON" | jq -r '(. | index("### Source Repository") + 1) as $idx | .[$idx]')
+          REPO=$(echo "$ISSUE_JSON" | jq -r 'index("### Source Repository") as $idx | .[$idx + 1]')
 
           # Extracting branch name
-          NEW_BRANCH=$(echo "$ISSUE_JSON" | jq -r '(. | index("### Branch Name") + 1) as $idx | .[$idx]')
+          NEW_BRANCH=$(echo "$ISSUE_JSON" | jq -r 'index("### Branch Name") as $idx | .[$idx + 1]')
 
           # Extracting source branch
-          SOURCE_BRANCH=$(echo "$ISSUE_JSON" | jq -r '(. | index("### Source Branch") + 1) as $idx | .[$idx]')
+          SOURCE_BRANCH=$(echo "$ISSUE_JSON" | jq -r 'index("### Source Branch") as $idx | .[$idx + 1]')
 
           echo "Extracted REPO: $REPO"
           echo "Extracted NEW_BRANCH: $NEW_BRANCH"
