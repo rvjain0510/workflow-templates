@@ -72,14 +72,5 @@ jobs:
 
           # Push the new branch to origin
           git push origin ${{ env.BRANCH_NAME }}
-          
-      - uses: GuillaumeFalourd/create-other-repo-branch-action@v1.5
-        with:
-          repository_owner: Rishav Jain
-          repository_name: ${{ env.SOURCE_REPOSITORY }}
-          new_branch_name: ${{ env.BRANCH_NAME }}
-          new_branch_ref: main
-          access_token: ${{ secrets.ACCESS_TOKEN}}
-          
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_BRANCH_TOKEN }}
