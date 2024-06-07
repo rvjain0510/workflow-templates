@@ -23,7 +23,32 @@ jobs:
           ISSUE_BODY="${{ github.event.issue.body }}"
           echo "ISSUE_BODY content:"
           echo "$ISSUE_BODY"
-          echo "$ISSUE_BODY" | sed -n '/^### Source Repository$/,/^$/ { /### Source Repository/d; /^$/d; p }'
+          echo "Original Input:"
+          echo "$ISSUE_BODY" | cat -A
+          
+          # Extract the section
+          echo -e "\nExtracting the section:"
+          SECTION=$(echo "$ISSUE_BODY" | sed -n '/^### Source Repository$/,/^$/p')
+          echo "$SECTION" | cat -A
+          
+          # Remove the header line
+          echo -e "\nRemoving the header:"
+          NO_HEADER=$(echo "$SECTION" | sed '/^### Source Repository$/d')
+          echo "$NO_HEADER" | cat -A
+          
+          # Remove empty lines
+          echo -e "\nRemoving empty lines:"
+          NO_EMPTY_LINES=$(echo "$NO_HEADER" | sed '/^$/d')
+          echo "$NO_EMPTY_LINES" | cat -A
+          
+          # Trim whitespace
+          echo -e "\nTrimming whitespace:"
+          FINAL_RESULT=$(echo "$NO_EMPTY_LINES" | xargs)
+          echo "$FINAL_RESULT" | cat -A
+          
+          # Assign to REPO
+          REPO=$FINAL_RESULT
+          echo "Extracted Source Repository: $REPO"
           # Extracting repository
           REPO=$(echo "$ISSUE_BODY" | sed -n '/^### Source Repository$/,/^$/ { /### Source Repository/d; /^$/d; p }' | xargs)
           
