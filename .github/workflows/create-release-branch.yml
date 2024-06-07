@@ -23,7 +23,7 @@ jobs:
           ISSUE_BODY="${{ github.event.issue.body }}"
           echo "ISSUE_BODY content:"
           echo "$ISSUE_BODY"
-
+          echo "$ISSUE_BODY" | sed -n '/^### Source Repository$/,/^$/ { /### Source Repository/d; /^$/d; p }'
           # Extracting repository
           REPO=$(echo "$ISSUE_BODY" | sed -n '/^### Source Repository$/,/^$/ { /### Source Repository/d; /^$/d; p }' | xargs)
           
