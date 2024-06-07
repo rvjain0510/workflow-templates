@@ -26,7 +26,7 @@ jobs:
 
           # Convert issue body to JSON format
           ISSUE_JSON=$(echo "$ISSUE_BODY" | jq -R -s '{"body": . }')
-          echo "ISSUE_JSON"
+          echo "$ISSUE_JSON"
           # Extracting repository
           REPO=$(echo "$ISSUE_JSON" | jq -r '.body | split("\n") | map(select(test("^### Source Repository$"))) | .[0] + 1 | select(test("^[^#]"))')
 
