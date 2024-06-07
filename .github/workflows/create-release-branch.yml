@@ -23,18 +23,19 @@ jobs:
           ISSUE_BODY="${{ github.event.issue.body }}"
           echo "ISSUE_BODY content:"
           echo "$ISSUE_BODY"
+          
 
           # Convert issue body to JSON format
-          ISSUE_JSON=$(echo "$ISSUE_BODY" | jq -R -s '{"body": . }')
+          ISSUE_JSON=$(echo "$ISSUE_BODY" | jq -R -s '. | split("\n") | map(select(length > 0)) | {body: .}')
           echo "$ISSUE_JSON"
           # Extracting repository
-          REPO=$(echo "$ISSUE_JSON" | jq -r '.body | split("\n") | map(select(test("^### Source Repository$"))) | .[0] + 1 | select(test("^[^#]"))')
+          REPO=$(echo "$ISSUE_JSON" | jq -r '.body | index("### Source Repository") as $idx | .[$idx + 1]')
 
           # Extracting branch name
-          NEW_BRANCH=$(echo "$ISSUE_JSON" | jq -r '.body | split("\n") | map(select(test("^### Branch Name$"))) | .[0] + 1 | select(test("^[^#]"))')
+          NEW_BRANCH=$(echo "$ISSUE_JSON" | jq -r '.body | index("### Branch Name") as $idx | .[$idx + 1]')
 
           # Extracting source branch
-          SOURCE_BRANCH=$(echo "$ISSUE_JSON" | jq -r '.body | split("\n") | map(select(test("^### Source Branch$"))) | .[0] + 1 | select(test("^[^#]"))')
+          SOURCE_BRANCH=$(echo "$ISSUE_JSON" | jq -r '.body | index("### Source Branch") as $idx | .[$idx + 1]')
 
           echo "Extracted REPO: $REPO"
           echo "Extracted NEW_BRANCH: $NEW_BRANCH"
