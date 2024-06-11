@@ -113,13 +113,15 @@ jobs:
           git commit -am "Update tag to ${{ env.NEW_TAG }}"
           git push origin qa/${{ env.NEW_TAG }}
           
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+          sudo apt-add-repository https://cli.github.com/packages
+          sudo apt update
+          sudo apt install gh  
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
-        with:
-          title: "Update tag to ${{ env.NEW_TAG }}"
-          commit-message: "Update tag to ${{ env.NEW_TAG }}"
-          branch: qa/${{ env.NEW_TAG }}
-          base: ${{ env.SOURCE_BRANCH }}
-          token: ${{ secrets.GITHUB_TOKEN }}    
+        run: |
+         cd trepo
+         gh pr create --base main --head qa/${{ env.NEW_TAG }} --title "<pull-request-title>" --body "<pull-request-description>"
         env:
           GITHUB_TOKEN: ${{ secrets.TESTY }}
