@@ -105,6 +105,8 @@ jobs:
           
       - name: Update tag in YAML file
         run: |
+          pwd
+          ls
           sed -i "s/^.*tag: .*/  tag: ${{ env.NEW_TAG }}/g" test.yaml
           git commit -am "Update tag to ${{ env.NEW_TAG }}"
           git push origin qa/${{ env.NEW_TAG }}
