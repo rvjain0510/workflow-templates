@@ -64,7 +64,7 @@ jobs:
           git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow-dep trepo          
           cd trepo
 
-                  # Extract the tag from the YAML file using sed
+          # Extract the tag from the YAML file using sed
           TAG=$(sed -n 's/^.*tag: \(.*\)/\1/p' test.yaml | grep ax360-bff)
           echo "Extracted tag: $TAG"
 
@@ -98,5 +98,9 @@ jobs:
 
           # Push the new branch to origin
           git push origin ${{ env.BRANCH_NAME }}
+
+          git tag ${{env.NEW_TAG}}
+
+          git push origin ${{env.NEW_TAG}}
         env:
           GITHUB_TOKEN: ${{ secrets.TESTY }}
