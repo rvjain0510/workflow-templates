@@ -102,5 +102,20 @@ jobs:
           git tag ${{env.NEW_TAG}}
 
           git push origin ${{env.NEW_TAG}}
+          
+      - name: Update tag in YAML file
+        run: |
+          sed -i "s/^.*tag: .*/  tag: ${{ env.NEW_TAG }}/g" test.yaml
+          git commit -am "Update tag to ${{ env.NEW_TAG }}"
+          git push origin qa/${{ env.NEW_TAG }}
+          
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          title: "Update tag to ${{ env.NEW_TAG }}"
+          commit-message: "Update tag to ${{ env.NEW_TAG }}"
+          branch: qa/${{ env.NEW_TAG }}
+          base: ${{ env.SOURCE_BRANCH }}
+          token: ${{ secrets.GITHUB_TOKEN }}    
         env:
           GITHUB_TOKEN: ${{ secrets.TESTY }}
