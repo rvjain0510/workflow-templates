@@ -19,20 +19,26 @@ body:
       label: Source Repository
       description: "The repository from which to create the release branch (e.g., `organization/repo-name`)."
       placeholder: "organization/repo-name"
+    validations:
+      required: true
   - type: input
     id: branch-name
     attributes:
       label: Branch Name
       description: "The name of the new release branch."
       placeholder: "release/v1.0.0"
+    validations:
+      required: true
   - type: checkboxes
     id: source-branch
     attributes:
       label: Source Branch
-      description: "The branch to create the release branch from (please select only one)."
+      description: "The branch to create the release branch from. **Please select only one.**"
       options:
         - label: main
         - label: develop
         - label: feature
         - label: hotfix
         - label: other
+    validations:
+      required: true
