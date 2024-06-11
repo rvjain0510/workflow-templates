@@ -61,7 +61,8 @@ jobs:
       - name: Create release branch
         run: |
           # Clone the source repository
-          git clone https://github.com/${{ env.SOURCE_REPOSITORY }} repo          
+          git@github.com:rvjain0510/test-workflow.git
+          git clone git@github.com:rvjain0510/${{ env.SOURCE_REPOSITORY }} repo          
           cd repo
 
           # Checkout the source branch
