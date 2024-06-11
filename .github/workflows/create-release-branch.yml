@@ -64,21 +64,20 @@ jobs:
           git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow-dep trepo          
           cd trepo
 
-          sudo apt-get update && sudo apt-get install -y yq
-
-          # Extract the tag from the YAML file
-          TAG=$(yq e '.apps[] | select(.name == "ax360-bff") | .tag' test.yaml)
+                  # Extract the tag from the YAML file using sed
+          TAG=$(sed -n 's/^.*tag: \(.*\)/\1/p' test.yaml | grep ax360-bff)
           echo "Extracted tag: $TAG"
 
           # Split the tag into components
-          IFS='.' read -r -a TAG_PARTS <<< "$TAG"
-          MAJOR=${TAG_PARTS[0]}
-          MINOR=${TAG_PARTS[1]}
-          PATCH=${TAG_PARTS[2]}
+          IFS='-' read -r NAME VERSION <<< "$TAG"
+          IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
 
           # Increment the patch version
           NEW_PATCH=$((PATCH + 1))
-          NEW_TAG="$MAJOR.$MINOR.$NEW_PATCH"
+          NEW_TAG="$NAME-$MAJOR.$MINOR.$NEW_PATCH"
           echo "New tag: $NEW_TAG"
 
           # Set environment variables
