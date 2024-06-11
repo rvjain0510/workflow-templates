@@ -25,14 +25,19 @@ body:
       label: Branch Name
       description: "The name of the new release branch."
       placeholder: "release/v1.0.0"
-  - type: select
+  - type: checkboxes
     id: source-branch
     attributes:
       label: Source Branch
-      description: "The branch to create the release branch from."
+      description: "The branch to create the release branch from (please select only one)."
       options:
-        - main
-        - develop
-        - feature
-        - hotfix
-        - other
+        - label: main
+          value: main
+        - label: develop
+          value: develop
+        - label: feature
+          value: feature
+        - label: hotfix
+          value: hotfix
+        - label: other
+          value: other
