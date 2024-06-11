@@ -1,4 +1,4 @@
-name: Create Release 
+name: Create Release
 description: Use this template to create a release branch from a different repository.
 title: "[Release Branch Request] - "
 labels:
@@ -25,9 +25,14 @@ body:
       label: Branch Name
       description: "The name of the new release branch."
       placeholder: "release/v1.0.0"
-  - type: input
+  - type: select
     id: source-branch
     attributes:
       label: Source Branch
-      description: "The branch to create the release branch from (e.g., `main` or `develop`)."
-      placeholder: "main"
+      description: "The branch to create the release branch from."
+      options:
+        - main
+        - develop
+        - feature
+        - hotfix
+        - other
