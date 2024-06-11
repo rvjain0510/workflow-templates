@@ -32,12 +32,7 @@ body:
       description: "The branch to create the release branch from (please select only one)."
       options:
         - label: main
-          value: main
         - label: develop
-          value: develop
         - label: feature
-          value: feature
         - label: hotfix
-          value: hotfix
         - label: other
-          value: other
