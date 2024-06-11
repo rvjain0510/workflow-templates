@@ -113,12 +113,12 @@ jobs:
           git commit -am "Update tag to ${{ env.NEW_TAG }}"
           git push origin qa/${{ env.NEW_TAG }}
           
-      - name: Install GitHub CLI
-        run: |
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-          sudo apt-add-repository https://cli.github.com/packages
-          sudo apt update
-          sudo apt install gh  
+      # - name: Install GitHub CLI
+      #   run: |
+      #     sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+      #     sudo apt-add-repository https://cli.github.com/packages
+      #     sudo apt update
+      #     sudo apt install gh  
       - name: Create Pull Request
         run: |
          cd trepo
