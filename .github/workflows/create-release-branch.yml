@@ -73,5 +73,5 @@ jobs:
 
           # Push the new branch to origin
           git push origin ${{ env.BRANCH_NAME }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.TESTY }}
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.TESTY }}
