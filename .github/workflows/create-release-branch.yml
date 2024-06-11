@@ -61,9 +61,9 @@ jobs:
       - name: Create release branch
         run: |
           # Clone the source repository
-          https://{{GITHUB_TOKEN}}@github.com/{rjain0510}/{env.SOURCE_REPOSITORY}.git repo
-          # git clone git@github.com:{rjain0510}/{env.SOURCE_REPOSITORY}.git repo
+          git clone https://github.com/${{ env.SOURCE_REPOSITORY }} repo          
           cd repo
+          git config remote.origin.url 'https://${{GITHUB_TOKEN}}@github.com/${{ github.repository }}
 
           # Checkout the source branch
           git checkout ${{ env.SOURCE_BRANCH }}
