@@ -61,7 +61,7 @@ jobs:
       - name: Create tag
         run: |
           # Clone the source repository
-          git clone https://${{ secrets.TESTY }}@github.com/test-workflow-dep trepo          
+          git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow-dep trepo          
           cd trepo
 
           sudo apt-get update && sudo apt-get install -y yq
