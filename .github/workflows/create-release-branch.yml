@@ -113,7 +113,7 @@ jobs:
          PR_URL=$(gh pr view --json url -q .url)
          echo "PR_URL=$PR_URL" >> $GITHUB_ENV
          env:
-          GITHUB_TOKEN: ${{ secrets.TESTY }}
+          GH_TOKEN: ${{ github.token }}
 
 
       - name: Comment on Issue with PR Link
