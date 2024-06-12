@@ -31,3 +31,15 @@ body:
       label: Source Branch
       description: "The branch to create the release branch from (e.g., `main` or `develop`)."
       placeholder: "main"
+  - type: input
+    id: pr-title
+    attributes:
+      label: Pull Request Title
+      description: "The title of the pull request to be created."
+      placeholder: "Release v1.0.0"
+  - type: textarea
+    id: pr-description
+    attributes:
+      label: Pull Request Description
+      description: "A detailed description of the pull request."
+      placeholder: "This pull request includes the following changes..."
