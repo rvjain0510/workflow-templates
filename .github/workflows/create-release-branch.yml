@@ -49,7 +49,7 @@ jobs:
           echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
           
           # Save the PR_DESCRIPTION to a file for multiline handling
-          echo "$PR_DESCRIPTION" > pr_description.txt
+          echo "$PR_DESCRIPTION" > $GITHUB_WORKSPACE/pr_description.txt
 
       - name: Print extracted variables
         run: |
@@ -57,7 +57,7 @@ jobs:
           echo "BRANCH_NAME=${{ env.BRANCH_NAME }}"
           echo "SOURCE_BRANCH=${{ env.SOURCE_BRANCH }}"
           echo "PR_TITLE=${{ env.PR_TITLE }}"
-          echo "PR_DESCRIPTION=$(cat pr_description.txt)"
+          echo "PR_DESCRIPTION=$(cat $GITHUB_WORKSPACE/pr_description.txt)"
 
       - name: Set up Git
         run: |
@@ -111,6 +111,6 @@ jobs:
       - name: Create Pull Request
         run: |
          cd trepo
-         gh pr create --base main --head qa/${{ env.NEW_TAG }} --title "${{ env.PR_TITLE }}" --body "$(cat pr_description.txt)"
+         gh pr create --base main --head qa/${{ env.NEW_TAG }} --title "${{ env.PR_TITLE }}" --body "$(cat $GITHUB_WORKSPACE/pr_description.txt)"
         env:
           GITHUB_TOKEN: ${{ secrets.TESTY }}
