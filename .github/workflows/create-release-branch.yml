@@ -66,7 +66,7 @@ jobs:
       - name: Create tag
         run: |
           # Clone the source repository
-          git clone https://${{ secrets.GITHUB_TOKEN }}@github.com/your-username/test-workflow-dep trepo
+          git clone https://${{ secrets.TESTY }}@github.com/your-username/test-workflow-dep trepo
           cd trepo
           # Extract the tag from the YAML file using sed
           TAG=$(sed -n 's/^.*tag: \(.*\)/\1/p' test.yaml | grep ax360-bff)
@@ -87,7 +87,7 @@ jobs:
       - name: Create release branch
         run: |
           # Clone the source repository
-          git clone https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ env.SOURCE_REPOSITORY }} repo
+          git clone https://${{ secrets.TESTY }}@github.com/${{ env.SOURCE_REPOSITORY }} repo
           cd repo
           # Checkout the source branch
           git checkout ${{ env.SOURCE_BRANCH }}
