@@ -16,99 +16,112 @@ jobs:
         run: |
           echo "Issue Body:"
           echo "${{ github.event.issue.body }}"
-          
+
       - name: Extract issue information
         id: extract
         run: |
           ISSUE_BODY="${{ github.event.issue.body }}"
           echo "ISSUE_BODY content:"
           echo "$ISSUE_BODY"
+
           # Convert issue body to JSON format
           ISSUE_JSON=$(echo "$ISSUE_BODY" | jq -R -s 'split("\n") | map(select(. != ""))')
+
           # Extracting repository
           REPO=$(echo "$ISSUE_JSON" | jq -r 'index("### Source Repository") as $idx | .[$idx + 1]')
+
           # Extracting branch name
           NEW_BRANCH=$(echo "$ISSUE_JSON" | jq -r 'index("### Branch Name") as $idx | .[$idx + 1]')
+
           # Extracting source branch
           SOURCE_BRANCH=$(echo "$ISSUE_JSON" | jq -r 'index("### Source Branch") as $idx | .[$idx + 1]')
-          # Extracting pull request title
-          PR_TITLE=$(echo "$ISSUE_JSON" | jq -r 'index("### Pull Request Title") as $idx | .[$idx + 1]')
-          # Extracting pull request description
-          PR_DESCRIPTION=$(echo "$ISSUE_JSON" | jq -r 'index("### Pull Request Description") as $idx | .[$idx + 1]')
-          
+
           echo "Extracted REPO: $REPO"
           echo "Extracted NEW_BRANCH: $NEW_BRANCH"
           echo "Extracted SOURCE_BRANCH: $SOURCE_BRANCH"
-          echo "Extracted PR_TITLE: $PR_TITLE"
-          echo "Extracted PR_DESCRIPTION: $PR_DESCRIPTION"
-          
+
           # Set environment variables
           echo "SOURCE_REPOSITORY=$REPO" >> $GITHUB_ENV
           echo "BRANCH_NAME=$NEW_BRANCH" >> $GITHUB_ENV
           echo "SOURCE_BRANCH=$SOURCE_BRANCH" >> $GITHUB_ENV
-          echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
-          echo "PR_DESCRIPTION=$PR_DESCRIPTION" >> $GITHUB_ENV
 
       - name: Print extracted variables
         run: |
           echo "SOURCE_REPOSITORY=${{ env.SOURCE_REPOSITORY }}"
           echo "BRANCH_NAME=${{ env.BRANCH_NAME }}"
           echo "SOURCE_BRANCH=${{ env.SOURCE_BRANCH }}"
-          echo "PR_TITLE=${{ env.PR_TITLE }}"
-          echo "PR_DESCRIPTION=${{ env.PR_DESCRIPTION }}"
           
+
       - name: Set up Git
         run: |
           git config --global credential.helper store
-          git config --global user.email "your-email@example.com"
-          git config --global user.name "your-username"
-          
-      - name: Create tag
+          git config --global user.email "jainrv0510@gmail.com"
+          git config --global user.name "rvjain0510"  
+
+     - name: Create tag
         run: |
           # Clone the source repository
-          git clone https://${{ secrets.GITHUB_TOKEN }}@github.com/your-username/test-workflow-dep trepo
+          git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow-dep trepo          
           cd trepo
+
           # Extract the tag from the YAML file using sed
           TAG=$(sed -n 's/^.*tag: \(.*\)/\1/p' test.yaml | grep ax360-bff)
           echo "Extracted tag: $TAG"
+
           # Split the tag into components
           IFS='-' read -r NAME VERSION <<< "$TAG"
           IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
           MAJOR=${VERSION_PARTS[0]}
           MINOR=${VERSION_PARTS[1]}
           PATCH=${VERSION_PARTS[2]}
+
           # Increment the patch version
           NEW_PATCH=$((PATCH + 1))
           NEW_TAG="$NAME-$MAJOR.$MINOR.$NEW_PATCH"
           echo "New tag: $NEW_TAG"
+
           # Set environment variables
           echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
-          
+
+
       - name: Create release branch
         run: |
           # Clone the source repository
-          git clone https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ env.SOURCE_REPOSITORY }} repo
+          git clone https://${{ secrets.TESTY }}@github.com/${{ env.SOURCE_REPOSITORY }} repo          
           cd repo
+
           # Checkout the source branch
           git checkout ${{ env.SOURCE_BRANCH }}
+
           # Create and checkout the new release branch
-          git checkout -b ${{ env.BRANCH_NAME }}
+          git checkout -b release/${{ env.NEW_TAG }}
+
           # Push the new branch to origin
-          git push origin ${{ env.BRANCH_NAME }}
-          git tag ${{ env.NEW_TAG }}
-          git push origin ${{ env.NEW_TAG }}
+          git push origin release/${{ env.BRANCH_NAME }}
+
+          git tag ${{env.NEW_TAG}}
+
+          git push origin ${{env.NEW_TAG}}
           
       - name: Update tag in YAML file
         run: |
+          pwd
+          ls
           cd trepo
           git checkout -b qa/${{ env.NEW_TAG }}
           sed -i "s/^.*tag: .*/  tag: ${{ env.NEW_TAG }}/g" test.yaml
           git commit -am "Update tag to ${{ env.NEW_TAG }}"
           git push origin qa/${{ env.NEW_TAG }}
+          
+      # - name: Install GitHub CLI
+      #   run: |
+      #     sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+      #     sudo apt-add-repository https://cli.github.com/packages
+      #     sudo apt update
+      #     sudo apt install gh  
       - name: Create Pull Request
         run: |
          cd trepo
-         gh pr create --base main --head qa/${{ env.NEW_TAG }} --title "${{ env.PR_TITLE }}" --body "${{ env.PR_DESCRIPTION }}"
+         gh pr create --base main --head qa/${{ env.NEW_TAG }} --title "<pull-request-title>" --body "<pull-request-description>"
         env:
-          GITHUB_TOKEN: ${{ secrets.TESTY }}     
-      
+          GITHUB_TOKEN: ${{ secrets.TESTY }}
