@@ -110,6 +110,8 @@ jobs:
          gh pr create --base main --head qa/${{ env.NEW_TAG }} --title "${{ env.PR_TITLE }}" --body "$(cat $GITHUB_WORKSPACE/pr_description.txt)"
          PR_URL=$(gh pr view --json url -q .url)
          echo "PR_URL=$PR_URL" >> $GITHUB_ENV
+         env:
+          GITHUB_TOKEN: ${{ secrets.TESTY }}
 
 
       - name: Comment on Issue with PR Link
