@@ -16,7 +16,7 @@ jobs:
         run: |
           echo "Issue Body:"
           echo "${{ github.event.issue.body }}"
-          
+
       - name: Extract issue information
         id: extract
         run: |
@@ -33,9 +33,9 @@ jobs:
           SOURCE_BRANCH=$(echo "$ISSUE_JSON" | jq -r 'index("### Source Branch") as $idx | .[$idx + 1]')
           # Extracting pull request title
           PR_TITLE=$(echo "$ISSUE_JSON" | jq -r 'index("### Pull Request Title") as $idx | .[$idx + 1]')
-          # Extracting pull request description
-          PR_DESCRIPTION=$(echo "$ISSUE_JSON" | jq -r 'index("### Pull Request Description") as $idx | .[$idx + 1]')
-          
+          # Extracting pull request description (includes spaces and lines)
+          PR_DESCRIPTION=$(echo "$ISSUE_BODY" | awk '/### Pull Request Description/{flag=1;next}/###/{flag=0}flag' | sed 's/^ *//;s/ *$//')
+
           echo "Extracted REPO: $REPO"
           echo "Extracted NEW_BRANCH: $NEW_BRANCH"
           echo "Extracted SOURCE_BRANCH: $SOURCE_BRANCH"
@@ -56,13 +56,13 @@ jobs:
           echo "SOURCE_BRANCH=${{ env.SOURCE_BRANCH }}"
           echo "PR_TITLE=${{ env.PR_TITLE }}"
           echo "PR_DESCRIPTION=${{ env.PR_DESCRIPTION }}"
-          
+
       - name: Set up Git
         run: |
           git config --global credential.helper store
           git config --global user.email "jainrv0510@gmail.com"
           git config --global user.name "rvjain0510"
-          
+
       - name: Create tag
         run: |
           # Clone the source repository
@@ -83,7 +83,7 @@ jobs:
           echo "New tag: $NEW_TAG"
           # Set environment variables
           echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
-          
+
       - name: Create release branch
         run: |
           # Clone the source repository
@@ -97,7 +97,7 @@ jobs:
           git push origin ${{ env.BRANCH_NAME }}
           git tag ${{ env.NEW_TAG }}
           git push origin ${{ env.NEW_TAG }}
-          
+
       - name: Update tag in YAML file
         run: |
           cd trepo
@@ -105,7 +105,7 @@ jobs:
           sed -i "s/^.*tag: .*/  tag: ${{ env.NEW_TAG }}/g" test.yaml
           git commit -am "Update tag to ${{ env.NEW_TAG }}"
           git push origin qa/${{ env.NEW_TAG }}
-           
+
       - name: Create Pull Request
         run: |
          cd trepo
