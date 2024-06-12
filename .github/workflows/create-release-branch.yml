@@ -104,8 +104,19 @@ jobs:
           git push origin qa/${{ env.NEW_TAG }}
 
       - name: Create Pull Request
+        id: create_pr
         run: |
          cd trepo
          gh pr create --base main --head qa/${{ env.NEW_TAG }} --title "${{ env.PR_TITLE }}" --body "$(cat $GITHUB_WORKSPACE/pr_description.txt)"
+         PR_URL=$(gh pr view --json url -q .url)
+         echo "PR_URL=$PR_URL" >> $GITHUB_ENV
+
+
+      - name: Comment on Issue with PR Link
+        run: |
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+          PR_URL=${{ env.PR_URL }}
+          COMMENT_BODY="The release branch has been created and a pull request has been opened: $PR_URL"
+          gh issue comment $ISSUE_NUMBER --body "$COMMENT_BODY"
         env:
           GITHUB_TOKEN: ${{ secrets.TESTY }}
