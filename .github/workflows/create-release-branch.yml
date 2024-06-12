@@ -94,10 +94,10 @@ jobs:
           git checkout ${{ env.SOURCE_BRANCH }}
 
           # Create and checkout the new release branch
-          git checkout -b ${{ env.BRANCH_NAME }}
+          git checkout -b release/${{ env.NEW_TAG }}
 
           # Push the new branch to origin
-          git push origin ${{ env.BRANCH_NAME }}
+          git push origin release/${{ env.BRANCH_NAME }}
 
           git tag ${{env.NEW_TAG}}
 
