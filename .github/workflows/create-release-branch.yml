@@ -100,7 +100,7 @@ jobs:
           cd trepo
           git checkout main
           git pull origin main
-          git checkout -b qa/${{ env.NEW_TAG }}
+          git checkout -b release/${{ env.NEW_TAG }}
           sed -i "s/^.*tag: .*/  tag: ${{ env.NEW_TAG }}/g" test.yaml
           git commit -am "Update tag to ${{ env.NEW_TAG }}"
           git push origin qa/${{ env.NEW_TAG }}
