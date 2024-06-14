@@ -36,7 +36,7 @@ jobs:
           EXTRACTED_KEYWORDS=$(echo "$ISSUE_BODY" | awk '/### Which repository you want to push/{flag=1;next}/###/{flag=0}flag' | grep -oP '(?<=\[X\] ).*')
           # Trim any leading/trailing whitespace
           EXTRACTED_KEYWORDS=$(echo $EXTRACTED_KEYWORDS | xargs)
-          PR_KEYWORDS=$(echo "$EXTRACTED_KEYWORDS" | sed 's/ /] [/g')
+          PR_KEYWORDS="[${KEYWORDS// /] [}]"
           echo "Extracted Keywords: $EXTRACTED_KEYWORDS"
           echo "Extracted REPO: $REPO"
           echo "Extracted SOURCE_BRANCH: $SOURCE_BRANCH"
