@@ -187,7 +187,7 @@ jobs:
         if: env.NEW_TAG_BFF
         run: |
           # Clone the source repository
-          git clone https://${{ secrets.TESTY }}@github.com/rjain0510/test-workflow test-workflow
+          git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow test-workflow
           cd test-workflow
           # Checkout the source branch
           git checkout main
@@ -202,7 +202,7 @@ jobs:
         if: env.NEW_TAG_KYC
         run: |
           # Clone the source repository
-          git clone https://${{ secrets.TESTY }}@github.com/rjain0510/KYC KYC
+          git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/KYC KYC
           cd KYC
           # Checkout the source branch
           git checkout main
@@ -217,7 +217,7 @@ jobs:
         if: env.NEW_TAG_NOTIFICATION
         run: |
           # Clone the source repository
-          git clone https://${{ secrets.TESTY }}@github.com/rjain0510/NOTIFICATION NOTIFICATION
+          git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/NOTIFICATION NOTIFICATION
           cd NOTIFICATION
           # Checkout the source branch
           git checkout main
