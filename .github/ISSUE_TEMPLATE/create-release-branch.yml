@@ -40,12 +40,12 @@ body:
   - type: checkboxes
     id: checkboxes
     attributes:
-      label: What kinds of M&Ms do you like?
+      label: Which repository you want to push
       description: You may select more than one.
       options:
-        - label: Green
-        - label: Orange
-        - label: Red
-        - label: Yellow
+        - label: KYC
+        - label: HOUSEHOLD
+        - label: DATA
+        - label: NOTIFICATION
     validations:
       required: false
