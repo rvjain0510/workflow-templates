@@ -143,12 +143,17 @@ jobs:
             # Extract tags from the YAML file
             TAGS=$(grep -oP 'tag:\s*\K(ax360-[a-z]+-v\d+\.\d+\.\d+)' "$FILE")
             
-            if [ -n "$TAGS" ]; then
-              while IFS= read -r TAG; do
-                echo "Extracted tag: $TAG"
-      
-                # Split the tag into components
-                IFS='-' read -r NAME VERSION <<< "$TAG"
+                if [ -n "$TAGS" ]; then
+                while IFS= read -r TAG; do
+                  echo "Extracted tag: $TAG"
+            
+                  # Extract NAME and VERSION from the tag
+                  NAME=$(echo "$TAG" | cut -d'-' -f1-2)
+                  VERSION=$(echo "$TAG" | cut -d'-' -f3-)
+            
+                  echo "NAME: $NAME"
+                  echo "VERSION: $VERSION"
+
                 if [[ " ${SHORTHAND_MAP[@]} " =~ " $NAME " ]]; then
                   # Get the corresponding shorthand for the name
                   SHORTHAND=""
