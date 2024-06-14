@@ -75,32 +75,32 @@ jobs:
       
           # Loop through each pull request and get detailed information
           jq -c '.[]' pulls.json | while read i; do
-            pr_number=$(echo $i | jq '.number')
-            pr_title=$(echo $i | jq -r '.title')
-            pr_body=$(curl -H "Authorization: token ${{ secrets.TESTY }}" \
-                            -H "Accept: application/vnd.github.v3+json" \
-                            https://api.github.com/repos/rvjain0510/test-workflow-dep/pulls/$pr_number | jq -r '.body')
-            pr_comments=$(curl -H "Authorization: token ${{ secrets.TESTY }}" \
+              pr_number=$(echo "$i" | jq '.number')
+              pr_title=$(echo "$i" | jq -r '.title')
+              pr_body=$(curl -H "Authorization: token ***" \
                               -H "Accept: application/vnd.github.v3+json" \
-                              https://api.github.com/repos/rvjain0510/test-workflow-dep/issues/$pr_number/comments | jq -c '.[] | {user: .user.login, comment: .body}')
-      
-            echo "PR #$pr_number: $pr_title"
-            echo "Body: $pr_body"
-            echo "Comments: $pr_comments"
-      
-            # Split keywords by space into an array
-            IFS=' ' read -r -a keywords <<< "${{ env.KEYWORDS }}"
-      
-            # Check if any keyword is present in the PR title
-            keyword_found=false
-            for keyword in "${keywords[@]}"; do
-            echo ""$keywords""
-              if [[ "$pr_title" == *"$keyword"* ]]; then
-                echo "PR $pr_number has keyword: $keyword"
-                keyword_found=true
-                break
-              fi
-            done
+                              "https://api.github.com/repos/rvjain0510/test-workflow-dep/pulls/$pr_number" | jq -r '.body')
+              pr_comments=$(curl -H "Authorization: token ***" \
+                                -H "Accept: application/vnd.github.v3+json" \
+                                "https://api.github.com/repos/rvjain0510/test-workflow-dep/issues/$pr_number/comments" | jq -c '.[] | {user: .user.login, comment: .body}')
+          
+              echo "PR #$pr_number: $pr_title"
+              echo "Body: $pr_body"
+              echo "Comments: $pr_comments"
+          
+              # Split keywords by space into an array
+              IFS=' ' read -r -a keywords <<< "HOUSEHOLD DATA NOTIFICATION"
+          
+              # Check if any keyword is present in the PR title
+              keyword_found=false
+              for keyword in "${keywords[@]}"; do
+                  if [[ "$pr_title" == *"$keyword"* ]]; then
+                      echo "PR $pr_number has keyword: $keyword"
+                      keyword_found=true
+                      break
+                  fi
+              done
+          done
 
       
       - name: Create tag
