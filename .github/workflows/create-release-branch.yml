@@ -72,7 +72,7 @@ jobs:
           curl -sSf -H "Authorization: token ${{ secrets.TESTY }}" \
                -H "Accept: application/vnd.github.v3+json" \
                https://api.github.com/repos/rvjain0510/test-workflow-dep/pulls?state=open \
-               -o pulls.json
+               -o pulls.json      
       - name: Check PR titles for keywords
         run: |
           # Read keywords from the environment variable
@@ -105,6 +105,8 @@ jobs:
               echo "PR #$pr_number titled '$pr_title' does not contain [QA]. Skipping keyword check."
             fi
           done
+            env:
+            GH_TOKEN: ${{ github.token }}
       - name: Get list of open pull requests
         run: |
           curl -H "Authorization: token ${{ secrets.TESTY }}" \
