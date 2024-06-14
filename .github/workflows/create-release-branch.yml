@@ -145,19 +145,21 @@ jobs:
           for FILE in "${YAML_FILES[@]}"; do
             echo "Processing $FILE"
             # Extract tags from the YAML file
-            TAGS=$(grep -oP 'tag:\s*\K(ax360-[a-z]+-v\d+\.\d+\.\d+)' "$FILE")
+            TAGS=$(grep -oP 'tag:\s*\K(ax360-[a-z]+-[a-z]+-v\d+\.\d+\.\d+)' "$FILE")
             
             if [ -n "$TAGS" ]; then
               while IFS= read -r TAG; do
                 echo "Extracted tag: $TAG"
       
                 # Split the tag into components
-                IFS='-' read -r NAME VERSION <<< "$TAG"
-                if [[ " ${SHORTHAND_MAP[@]} " =~ " $NAME " ]]; then
+                NAME_VERSION="${TAG%-v*}"
+                VERSION="${TAG##*-v}"
+                
+                if [[ " ${SHORTHAND_MAP[@]} " =~ " $NAME_VERSION " ]]; then
                   # Get the corresponding shorthand for the name
                   SHORTHAND=""
                   for key in "${!SHORTHAND_MAP[@]}"; do
-                    if [[ "${SHORTHAND_MAP[$key]}" == "$NAME" ]]; then
+                    if [[ "${SHORTHAND_MAP[$key]}" == "$NAME_VERSION" ]]; then
                       SHORTHAND=$key
                       break
                     fi
@@ -174,16 +176,16 @@ jobs:
                     
                     # Increment the patch version
                     NEW_PATCH=$((PATCH + 1))
-                    NEW_TAG="$NAME-$MAJOR.$MINOR.$NEW_PATCH"
+                    NEW_TAG="$NAME_VERSION-v$MAJOR.$MINOR.$NEW_PATCH"
                     echo "New tag: $NEW_TAG"
                     
                     # Set environment variables
-                    echo "NEW_TAG_${FILE}_${NAME}=$NEW_TAG" >> $GITHUB_ENV
+                    echo "NEW_TAG_${FILE}_${NAME_VERSION}=$NEW_TAG" >> $GITHUB_ENV
                   else
                     echo "Tag $TAG (shorthand $SHORTHAND) is not in the target list."
                   fi
                 else
-                  echo "Tag $TAG (name $NAME) does not match any shorthand in the map."
+                  echo "Tag $TAG (name $NAME_VERSION) does not match any shorthand in the map."
                 fi
               done <<< "$TAGS"
             else
