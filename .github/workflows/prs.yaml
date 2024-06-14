@@ -19,41 +19,43 @@ jobs:
           echo "Issue Body:"
           echo "$ISSUE_BODY"
           
-          # Extract keywords and wrap them in []
-          EXTRACTED_KEYWORDS=$(echo "$ISSUE_BODY" | awk '/### What kinds of M&Ms do you like?/{flag=1;next}/###/{flag=0}flag' | grep -oP '(?<=\[X\] ).*' | sed -e 's/^/[/' -e 's/$/]/' | xargs)
+          EXTRACTED_KEYWORDS=$(echo "$ISSUE_BODY" | awk '/### What kinds of M&Ms do you like?/{flag=1;next}/###/{flag=0}flag' | grep -oP '(?<=\[X\] ).*')
+          
+          # Trim any leading/trailing whitespace
+          EXTRACTED_KEYWORDS=$(echo $EXTRACTED_KEYWORDS | xargs)
           
           echo "Extracted Keywords: $EXTRACTED_KEYWORDS"
           
           # Set environment variable
           echo "KEYWORDS=$EXTRACTED_KEYWORDS" >> $GITHUB_ENV
-          echo "${{ env.KEYWORDS }}"
+          echo "${{env.KEYWORDS}}"
 
-      - name: List open pull requests
-        id: list-prs
-        run: |
-          # Construct OR condition for each keyword
-          OR_CONDITION=""
-          for keyword in ${{ env.KEYWORDS }}; do
-            OR_CONDITION="$OR_CONDITION+head:refs/heads/$keyword"
-          done
+      # - name: List open pull requests
+      #   id: list-prs
+      #   run: |
+      #     # Construct OR condition for each keyword
+      #     OR_CONDITION=""
+      #     for keyword in ${{ env.KEYWORDS }}; do
+      #       OR_CONDITION="$OR_CONDITION+head:refs/heads/$keyword"
+      #     done
           
-          # List open pull requests matching any of the keywords
-          PR_LIST=$(curl -s -H "Authorization: token ${{  secrets.TESTY }}" \
-                    -H "Accept: application/vnd.github.v3+json" \
-                    "https://api.github.com/repos/rvjain0510/test-workflow-dep/pulls?state=open&base=master$OR_CONDITION")
+      #     # List open pull requests matching any of the keywords
+      #     PR_LIST=$(curl -s -H "Authorization: token ${{  secrets.TESTY }}" \
+      #               -H "Accept: application/vnd.github.v3+json" \
+      #               "https://api.github.com/repos/rvjain0510/test-workflow-dep/pulls?state=open&base=master$OR_CONDITION")
           
-          # Count the number of matching PRs
-          PR_COUNT=$(echo "$PR_LIST" | jq length)
+      #     # Count the number of matching PRs
+      #     PR_COUNT=$(echo "$PR_LIST" | jq length)
           
-          echo "::set-output name=pr_count::$PR_COUNT"
+      #     echo "::set-output name=pr_count::$PR_COUNT"
 
-      - name: Check PR count
-        run: |
-          PR_COUNT="${{ steps.list-prs.outputs.pr_count }}"
-          echo "Number of open PRs matching the keywords: $PR_COUNT"
-          if [ "$PR_COUNT" -gt 0 ]; then
-            echo "There are open PRs matching the keywords."
-            # You can add further actions here if needed
-          else
-            echo "No open PRs matching the keywords."
-          fi
+      # - name: Check PR count
+      #   run: |
+      #     PR_COUNT="${{ steps.list-prs.outputs.pr_count }}"
+      #     echo "Number of open PRs matching the keywords: $PR_COUNT"
+      #     if [ "$PR_COUNT" -gt 0 ]; then
+      #       echo "There are open PRs matching the keywords."
+      #       # You can add further actions here if needed
+      #     else
+      #       echo "No open PRs matching the keywords."
+      #     fi
