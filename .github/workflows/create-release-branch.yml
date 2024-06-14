@@ -105,7 +105,7 @@ jobs:
               echo "PR #$pr_number titled '$pr_title' does not contain [QA]. Skipping keyword check."
             fi
           done
-          env:
+        env:
           GH_TOKEN: ${{ secrets.TESTY }}
       - name: Get list of open pull requests
         run: |
