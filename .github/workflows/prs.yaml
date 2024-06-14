@@ -19,49 +19,41 @@ jobs:
           echo "Issue Body:"
           echo "$ISSUE_BODY"
           
-          EXTRACTED_KEYWORDS=$(echo "$ISSUE_BODY" | awk '/### What kinds of M&Ms do you like?/{flag=1;next}/###/{flag=0}flag' | grep -oP '(?<=\[X\] ).*')
-          
-          # Trim any leading/trailing whitespace
-          EXTRACTED_KEYWORDS=$(echo $EXTRACTED_KEYWORDS | xargs)
+          # Extract keywords and wrap them in []
+          EXTRACTED_KEYWORDS=$(echo "$ISSUE_BODY" | awk '/### What kinds of M&Ms do you like?/{flag=1;next}/###/{flag=0}flag' | grep -oP '(?<=\[X\] ).*' | sed -e 's/^/[/' -e 's/$/]/' | xargs)
           
           echo "Extracted Keywords: $EXTRACTED_KEYWORDS"
           
           # Set environment variable
           echo "KEYWORDS=$EXTRACTED_KEYWORDS" >> $GITHUB_ENV
+          echo "${{ env.KEYWORDS }}"
 
-          echo "${{env.KEYWORDS}}"
-          
-
-
-      - name: Check if keyword is empty
+      - name: List open pull requests
+        id: list-prs
         run: |
-          if [ -z "${{ env.KEYWORDS }}" ]; then
-            echo "No keyword selected. Exiting workflow."
-            exit 1
-          fi
-
-      - name: Check for open PRs with specific keyword
-        id: check_open_prs
-        run: |
-          # Convert keywords to array (if there are multiple keywords)
-          IFS=',' read -r -a KEYWORDS_ARRAY <<< "$KEYWORD"
-          
-          # Fetch open PRs and filter by each keyword
-          OPEN_PR_COUNT=0
-          for keyword in "${KEYWORDS_ARRAY[@]}"; do
-            PR_COUNT=$(curl -s -H "Authorization: token ${{ secrets.TESTY }}" \
-                       -H "Accept: application/vnd.github.v3+json" \
-                       "https://api.github.com/repos/${{ github.repository }}/pulls?state=open" \
-                       | jq ".[] | select(.title | test(\"$keyword\")) | .number" \
-                       | wc -l)
-            OPEN_PR_COUNT=$((OPEN_PR_COUNT + PR_COUNT))
+          # Construct OR condition for each keyword
+          OR_CONDITION=""
+          for keyword in ${{ env.KEYWORDS }}; do
+            OR_CONDITION="$OR_CONDITION+head:refs/heads/$keyword"
           done
           
-          echo "Open PRs with keyword(s) '$KEYWORD': $OPEN_PR_COUNT"
-          echo "::set-output name=open_pr_count::$OPEN_PR_COUNT"
+          # List open pull requests matching any of the keywords
+          PR_LIST=$(curl -s -H "Authorization: token ${{  secrets.TESTY }}" \
+                    -H "Accept: application/vnd.github.v3+json" \
+                    "https://api.github.com/repos/rvjain0510/test-workflow-dep/pulls?state=open&base=master$OR_CONDITION")
+          
+          # Count the number of matching PRs
+          PR_COUNT=$(echo "$PR_LIST" | jq length)
+          
+          echo "::set-output name=pr_count::$PR_COUNT"
 
-      - name: Check if there are open PRs
-        if: steps.check_open_prs.outputs.open_pr_count != '0'
+      - name: Check PR count
         run: |
-          echo "There are open PRs with the keyword(s). Skipping release branch creation."
-          exit 0  # Exit successfully to skip further steps
+          PR_COUNT="${{ steps.list-prs.outputs.pr_count }}"
+          echo "Number of open PRs matching the keywords: $PR_COUNT"
+          if [ "$PR_COUNT" -gt 0 ]; then
+            echo "There are open PRs matching the keywords."
+            # You can add further actions here if needed
+          else
+            echo "No open PRs matching the keywords."
+          fi
