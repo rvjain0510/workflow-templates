@@ -128,13 +128,15 @@ jobs:
           cd trepo
       
           # Define the YAML files you want to process
-          YAML_FILES=("test.yaml") # Add more files as needed
+          YAML_FILES=("test.yaml" "test1.yaml") # Add more files as needed
       
           # Define the shorthand mappings
           declare -A SHORTHAND_MAP
           SHORTHAND_MAP=(
             ["BFF"]="ax360-bff"
             ["AX360"]="ax360-webapp"
+            ["KYC"]="iapw-kyc"
+            ["NOTIFICATION"]="iapw-notification"
           )
       
           # Define the shorthands you are interested in, separated by spaces
@@ -143,7 +145,7 @@ jobs:
           for FILE in "${YAML_FILES[@]}"; do
             echo "Processing $FILE"
             # Extract tags from the YAML file
-            TAGS=$(grep -oP 'tag:\s*\K(ax360-[a-z]+-v\d+\.\d+\.\d+)' "$FILE")
+            TAGS=$(grep -oP 'tag:\s*\K([a-z]-[a-z]+-v\d+\.\d+\.\d+)' "$FILE")
             
                 if [ -n "$TAGS" ]; then
                 while IFS= read -r TAG; do
@@ -196,7 +198,7 @@ jobs:
             fi
           done
 
-      - name: Create release branch
+      - name: Create release branch for BFF
         if: env.NEW_TAG_BFF
         run: |
           env
@@ -211,6 +213,23 @@ jobs:
           git push origin release/${{env.NEW_TAG_BFF}}
           git tag ${{env.NEW_TAG_BFF}}
           git push origin ${{env.NEW_TAG_BFF}}
+          
+      - name: Create release branch for KYC
+        if: env.NEW_TAG_KYC
+        run: |
+          env
+          # Clone the source repository
+          git clone https://${{ secrets.TESTY }}@github.com/${{ env.SOURCE_REPOSITORY }} repo
+          cd repo
+          # Checkout the source branch
+          git checkout ${{ env.SOURCE_BRANCH }}
+          # Create and checkout the new release branch
+          git checkout -b release/${{env.NEW_TAG_BFF}}
+          # Push the new branch to origin
+          git push origin release/${{env.NEW_TAG_BFF}}
+          git tag ${{env.NEW_TAG_BFF}}
+          git push origin ${{env.NEW_TAG_BFF}}      
+          
       - name: Update tag in YAML file
         run: |
           cd trepo
