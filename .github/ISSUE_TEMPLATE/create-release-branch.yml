@@ -1,6 +1,6 @@
 name: Create Release 
-description: Use this template to push your code to QA enviroment
-title: "[QA] deployment of latest code to qa - "
+description: Use this template to push your code to QA environment
+title: "[QA] Deployment of latest code to QA - "
 labels:
   - release
   - workflow
@@ -20,7 +20,7 @@ body:
         - label: AX360
         - label: BFF
     validations:
-      required: TRUE
+      required: true
  
   - type: textarea
     id: pr-description
@@ -28,6 +28,5 @@ body:
       label: Pull Request Description
       description: "A detailed description of the pull request."
       placeholder: "This pull request includes the following changes..."
-   validations:
-    required: TRUE   
-
+    validations:
+      required: true
