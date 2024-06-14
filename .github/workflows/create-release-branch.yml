@@ -125,38 +125,32 @@ jobs:
 
       - name: Create tags
         run: |
-          # Clone the source repository
+          set -x  # Enable debug output
           git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow-dep trepo
           cd trepo
       
-          # Define the YAML files you want to process
-          YAML_FILES=("test.yaml") # Add more files as needed
+          YAML_FILES=("test.yaml")
       
-          # Define the shorthand mappings
           declare -A SHORTHAND_MAP
           SHORTHAND_MAP=(
             ["BFF"]="ax360-bff"
             ["AX360"]="ax360-webapp"
           )
       
-          # Define the shorthands you are interested in, separated by spaces
-          TARGET_SHORTHANDS="${{ env.KEYWORDS }}"
+          TARGET_SHORTHANDS="${{env.KEYWORDS}}"
       
           for FILE in "${YAML_FILES[@]}"; do
             echo "Processing $FILE"
-            # Extract tags from the YAML file
             TAGS=$(grep -oP 'tag:\s*\K(ax360-[a-z]+-[a-z]+-v\d+\.\d+\.\d+)' "$FILE")
             
             if [ -n "$TAGS" ]; then
               while IFS= read -r TAG; do
                 echo "Extracted tag: $TAG"
       
-                # Split the tag into components
                 NAME_VERSION="${TAG%-v*}"
                 VERSION="${TAG##*-v}"
                 
                 if [[ " ${SHORTHAND_MAP[@]} " =~ " $NAME_VERSION " ]]; then
-                  # Get the corresponding shorthand for the name
                   SHORTHAND=""
                   for key in "${!SHORTHAND_MAP[@]}"; do
                     if [[ "${SHORTHAND_MAP[$key]}" == "$NAME_VERSION" ]]; then
@@ -165,7 +159,6 @@ jobs:
                     fi
                   done
       
-                  # Check if the shorthand is in the target list
                   if [[ " $TARGET_SHORTHANDS " =~ " $SHORTHAND " ]]; then
                     echo "Tag $TAG (shorthand $SHORTHAND) is in the target list."
       
@@ -174,12 +167,10 @@ jobs:
                     MINOR=${VERSION_PARTS[1]}
                     PATCH=${VERSION_PARTS[2]}
                     
-                    # Increment the patch version
                     NEW_PATCH=$((PATCH + 1))
                     NEW_TAG="$NAME_VERSION-v$MAJOR.$MINOR.$NEW_PATCH"
                     echo "New tag: $NEW_TAG"
                     
-                    # Set environment variables
                     echo "NEW_TAG_${FILE}_${NAME_VERSION}=$NEW_TAG" >> $GITHUB_ENV
                   else
                     echo "Tag $TAG (shorthand $SHORTHAND) is not in the target list."
@@ -192,6 +183,7 @@ jobs:
               echo "No tags found in $FILE"
             fi
           done
+
 
       - name: Create release branch
         run: |
