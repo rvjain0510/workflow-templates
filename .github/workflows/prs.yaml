@@ -19,11 +19,14 @@ jobs:
           echo "Issue Body:"
           echo "$ISSUE_BODY"
           
-          KEYWORD=$(echo "$ISSUE_BODY" | awk '/- \[ \] Keywords:/{flag=1;next}/- \[x\] Keywords:/{flag=1;next}/- \[X\] Keywords:/{flag=1;next}/- \[X\] Keywords:/{flag=1;next}flag' | sed 's/^ *//;s/ *$//')
-          echo "Extracted Keywords: $KEYWORD"
+          EXTRACTED_KEYWORDS=$(echo "$ISSUE_BODY" | awk '/### What kinds of M&Ms do you like?/{flag=1;next}/###/{flag=0}flag' | grep -oP '(?<=\[X\] ).*')
+          
+          echo "Extracted Keywords: $EXTRACTED_KEYWORDS"
           
           # Set environment variable
-          echo "KEYWORD=$KEYWORD" >> $GITHUB_ENV
+          echo "KEYWORDS=$EXTRACTED_KEYWORDS" >> $GITHUB_ENV
+          
+
 
       - name: Check if keyword is empty
         run: |
