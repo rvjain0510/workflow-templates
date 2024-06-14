@@ -235,7 +235,7 @@ jobs:
           git pull origin main
           
           # Create a new branch based on today's date
-          BRANCH_NAME="qa/$(date +'%Y-%m-%d')_${GITHUB_EVENT_ISSUE_NUMBER}"
+          BRANCH_NAME="qa/$(date +'%Y-%m-%d')_${{ github.event.issue.number }}"
           git checkout -b $BRANCH_NAME
           
           # Define YAML files to process
