@@ -17,7 +17,6 @@ jobs:
         run: |
           echo "Issue Body:"
           echo "${{ github.event.issue.body }}"
-
       - name: Extract issue information
         id: extract
         run: |
@@ -51,7 +50,6 @@ jobs:
           # Save the PR_DESCRIPTION to a file for multiline handling
           echo "$PR_DESCRIPTION" > $GITHUB_WORKSPACE/pr_description.txt
           echo "KEYWORDS=$EXTRACTED_KEYWORDS" >> $GITHUB_ENV
-
       - name: Print extracted variables
         run: |
           echo "SOURCE_REPOSITORY=${{ env.SOURCE_REPOSITORY }}"
@@ -73,7 +71,6 @@ jobs:
                -H "Accept: application/vnd.github.v3+json" \
                https://api.github.com/repos/rvjain0510/test-workflow-dep/pulls?state=open \
                -o pulls.json
-
       - name: Check PR titles for keywords
         run: |
           # Read keywords from the environment variable
@@ -122,115 +119,73 @@ jobs:
             echo "Body: $pr_body"
             echo "Comments: $pr_comments"
           done
-      - name: Clone repository
+      - name: Create tags
         run: |
+          # Clone the source repository
           git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow-dep trepo
           cd trepo
-          declare -A SHORTHAND_MAP
-          SHORTHAND_MAP["ax360-bff"]="BFF"
-          SHORTHAND_MAP["ax360-webapp"]="AX360"
-          
-          # List of YAML files to process
-          YAML_FILES=("test.yaml")
-          
-          # Target shorthands to look for
-          TARGET_SHORTHANDS=("BFF")
-          
-          # Loop through each YAML file
-          for FILE in "${YAML_FILES[@]}"; do
-            echo "Processing $FILE"
-            cat "$FILE"  # Print the contents of test.yaml for debugging
-          
-            # Example of processing tags in YAML
-            TAGS=$(grep -oP 'tag:\s*\K(ax360-[a-z]+-[a-z]+-v\d+\.\d+\.\d+)' "$FILE" || true)
-          
-            if [ -n "$TAGS" ]; then
-              while IFS= read -r TAG; do
-                echo "Extracted tag: $TAG"
-                NAME_VERSION="${TAG%-v*}"
-                VERSION="${TAG##*-v}"
-          
-                # Check if the NAME_VERSION is in the shorthand map
-                if [[ " ${SHORTHAND_MAP[@]} " =~ " $NAME_VERSION " ]]; then
-                  SHORTHAND=""
-                  for key in "${!SHORTHAND_MAP[@]}"; do
-                    if [[ "${SHORTHAND_MAP[$key]}" == "$NAME_VERSION" ]]; then
-                      SHORTHAND=$key
-                      break
-                    fi
-                  done
-          
-                  # Check if the shorthand is in the target list
-                  if [[ " ${TARGET_SHORTHANDS[@]} " =~ " $SHORTHAND " ]]; then
-                    echo "Tag $TAG (shorthand $SHORTHAND) is in the target list."
-                    # Example of further processing based on the shorthand
-                  else
-                    echo "Tag $TAG (shorthand $SHORTHAND) is not in the target list."
-                    # Handle if necessary
-                  fi
-                else
-                  echo "Tag $TAG (name $NAME_VERSION) does not match any shorthand in the map."
-                  # Handle if necessary
-                fi
-              done <<< "$TAGS"
-            else
-              echo "No tags found in $FILE"
-            fi
-          done
-          YAML_FILES=("test.yaml")
+      
+          # Define the YAML files you want to process
+          YAML_FILES=("test.yaml") # Add more files as needed
+      
+          # Define the shorthand mappings
           declare -A SHORTHAND_MAP
           SHORTHAND_MAP=(
             ["ax360-bff"]="BFF"
             ["ax360-webapp"]="AX360"
           )
-          TARGET_SHORTHANDS="BFF"
-
+      
+          # Define the shorthands you are interested in, separated by spaces
+          TARGET_SHORTHANDS="${{ env.KEYWORDS }}"
+      
           for FILE in "${YAML_FILES[@]}"; do
             echo "Processing $FILE"
-            cat "$FILE"  # Print the contents of test.yaml for debugging
-            TAGS=$(grep -oP 'tag:\s*\K(ax360-[a-z]+-[a-z]+-v\d+\.\d+\.\d+)' "$FILE" || true)
+            # Extract tags from the YAML file
+            TAGS=$(grep -oP 'tag:\s*\K(ax360-[a-z]+-v\d+\.\d+\.\d+)' "$FILE")
             
             if [ -n "$TAGS" ]; then
               while IFS= read -r TAG; do
                 echo "Extracted tag: $TAG"
-
-                NAME_VERSION="${TAG%-v*}"
-                VERSION="${TAG##*-v}"
-                
-                if [[ " ${SHORTHAND_MAP[@]} " =~ " $NAME_VERSION " ]]; then
+      
+                # Split the tag into components
+                IFS='-' read -r NAME VERSION <<< "$TAG"
+                if [[ " ${SHORTHAND_MAP[@]} " =~ " $NAME " ]]; then
+                  # Get the corresponding shorthand for the name
                   SHORTHAND=""
                   for key in "${!SHORTHAND_MAP[@]}"; do
-                    if [[ "${SHORTHAND_MAP[$key]}" == "$NAME_VERSION" ]]; then
+                    if [[ "${SHORTHAND_MAP[$key]}" == "$NAME" ]]; then
                       SHORTHAND=$key
                       break
                     fi
                   done
-
+      
+                  # Check if the shorthand is in the target list
                   if [[ " $TARGET_SHORTHANDS " =~ " $SHORTHAND " ]]; then
                     echo "Tag $TAG (shorthand $SHORTHAND) is in the target list."
-
+      
                     IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
                     MAJOR=${VERSION_PARTS[0]}
                     MINOR=${VERSION_PARTS[1]}
                     PATCH=${VERSION_PARTS[2]}
                     
+                    # Increment the patch version
                     NEW_PATCH=$((PATCH + 1))
-                    NEW_TAG="$NAME_VERSION-v$MAJOR.$MINOR.$NEW_PATCH"
+                    NEW_TAG="$NAME-$MAJOR.$MINOR.$NEW_PATCH"
                     echo "New tag: $NEW_TAG"
                     
-                    echo "NEW_TAG_${FILE}_${NAME_VERSION}=$NEW_TAG" >> $GITHUB_ENV
+                    # Set environment variables
+                    echo "NEW_TAG_${FILE}_${NAME}=$NEW_TAG" >> $GITHUB_ENV
                   else
                     echo "Tag $TAG (shorthand $SHORTHAND) is not in the target list."
                   fi
                 else
-                  echo "Tag $TAG (name $NAME_VERSION) does not match any shorthand in the map."
+                  echo "Tag $TAG (name $NAME) does not match any shorthand in the map."
                 fi
               done <<< "$TAGS"
             else
               echo "No tags found in $FILE"
             fi
           done
-
 
       - name: Create release branch
         run: |
@@ -245,7 +200,6 @@ jobs:
           git push origin release/${{ env.NEW_TAG }}
           git tag ${{ env.NEW_TAG }}
           git push origin ${{ env.NEW_TAG }}
-
       - name: Update tag in YAML file
         run: |
           cd trepo
@@ -255,7 +209,6 @@ jobs:
           sed -i "s/^.*tag: .*/  tag: ${{ env.NEW_TAG }}/g" test.yaml
           git commit -am "Update tag to ${{ env.NEW_TAG }}"
           git push origin qa/${{ env.NEW_TAG }}
-
       - name: Create Pull Request
         id: create_pr
         run: |
