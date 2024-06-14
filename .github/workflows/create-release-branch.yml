@@ -196,6 +196,7 @@ jobs:
 
       - name: Create release branch
         run: |
+          env
           # Clone the source repository
           git clone https://${{ secrets.TESTY }}@github.com/${{ env.SOURCE_REPOSITORY }} repo
           cd repo
