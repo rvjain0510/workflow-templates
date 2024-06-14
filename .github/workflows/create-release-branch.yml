@@ -131,8 +131,8 @@ jobs:
           # Define the shorthand mappings
           declare -A SHORTHAND_MAP
           SHORTHAND_MAP=(
-            ["ax360-bff"]="BFF"
-            ["ax360-webapp"]="AX360"
+            ["BFF"]="ax360-bff"
+            ["AX360"]="ax360-webapp"
           )
       
           # Define the shorthands you are interested in, separated by spaces
