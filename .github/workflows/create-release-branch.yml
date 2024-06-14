@@ -36,7 +36,7 @@ jobs:
           EXTRACTED_KEYWORDS=$(echo "$ISSUE_BODY" | awk '/### Which repository you want to push/{flag=1;next}/###/{flag=0}flag' | grep -oP '(?<=\[X\] ).*')
           # Trim any leading/trailing whitespace
           EXTRACTED_KEYWORDS=$(echo $EXTRACTED_KEYWORDS | xargs)
-          
+          PR_KEYWORDS=$(echo "$EXTRACTED_KEYWORDS" | sed 's/ /] [/g')
           echo "Extracted Keywords: $EXTRACTED_KEYWORDS"
           echo "Extracted REPO: $REPO"
           echo "Extracted SOURCE_BRANCH: $SOURCE_BRANCH"
@@ -50,6 +50,7 @@ jobs:
           # Save the PR_DESCRIPTION to a file for multiline handling
           echo "$PR_DESCRIPTION" > $GITHUB_WORKSPACE/pr_description.txt
           echo "KEYWORDS=$EXTRACTED_KEYWORDS" >> $GITHUB_ENV
+          echo "PR_KEYWORDS=$PR_KEYWORDS" >> $GITHUB_ENV
       - name: Print extracted variables
         run: |
           echo "SOURCE_REPOSITORY=${{ env.SOURCE_REPOSITORY }}"
@@ -222,7 +223,7 @@ jobs:
         id: create_pr
         run: |
          cd trepo
-         gh pr create --base main --head qa/${{ env.NEW_TAG }} --title "${{ env.PR_TITLE }}" --body "$(cat $GITHUB_WORKSPACE/pr_description.txt)"
+         gh pr create --base main --head qa/$(date +"%Y-%m-%d_%H-%M-%S") --title "${{ env.PR_KEYWORDS }}" --body "$(cat $GITHUB_WORKSPACE/pr_description.txt)"
          PR_URL=$(gh pr view --json url -q .url)
          echo "PR_URL=$PR_URL" >> $GITHUB_ENV
         env:
