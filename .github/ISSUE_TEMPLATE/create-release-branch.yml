@@ -47,5 +47,7 @@ body:
         - label: HOUSEHOLD
         - label: DATA
         - label: NOTIFICATION
+        - label: AX360
+        - label: BFF
     validations:
       required: false
