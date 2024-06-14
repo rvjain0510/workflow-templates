@@ -21,44 +21,41 @@ jobs:
         id: extract
         run: |
           ISSUE_BODY="${{ github.event.issue.body }}"
-          echo "ISSUE_BODY content:"
+          echo "Issue Body:"
           echo "$ISSUE_BODY"
+
           # Convert issue body to JSON format
-          ISSUE_JSON=$(echo "$ISSUE_BODY" | jq -R -s 'split("\n") | map(select(. != ""))')
+          ISSUE_JSON=$(echo "$ISSUE_BODY" | jq -Rs 'split("\n") | map(select(. != ""))')
+
           # Extracting repository
           REPO=$(echo "$ISSUE_JSON" | jq -r 'index("### Source Repository") as $idx | .[$idx + 1]')
+
           # Extracting source branch
           SOURCE_BRANCH=$(echo "$ISSUE_JSON" | jq -r 'index("### Source Branch") as $idx | .[$idx + 1]')
+
           # Extracting pull request title
           PR_TITLE=$(echo "$ISSUE_JSON" | jq -r 'index("### Pull Request Title") as $idx | .[$idx + 1]')
-          # Extracting pull request description (includes spaces and lines)
+
+          # Extracting pull request description
           PR_DESCRIPTION=$(echo "$ISSUE_BODY" | awk '/### Pull Request Description/{flag=1;next}/###/{flag=0}flag' | sed 's/^ *//;s/ *$//')
+
+          # Extracting keywords
           EXTRACTED_KEYWORDS=$(echo "$ISSUE_BODY" | awk '/### Which repository you want to push/{flag=1;next}/###/{flag=0}flag' | grep -oP '(?<=\[X\] ).*')
-          # Trim any leading/trailing whitespace
           EXTRACTED_KEYWORDS=$(echo $EXTRACTED_KEYWORDS | xargs)
-          
+
           echo "Extracted Keywords: $EXTRACTED_KEYWORDS"
           echo "Extracted REPO: $REPO"
           echo "Extracted SOURCE_BRANCH: $SOURCE_BRANCH"
           echo "Extracted PR_TITLE: $PR_TITLE"
           echo "Extracted PR_DESCRIPTION: $PR_DESCRIPTION"
-          echo "Extracted EXTRACTED_KEYWORDS: $EXTRACTED_KEYWORDS"
+
           # Set environment variables
           echo "SOURCE_REPOSITORY=$REPO" >> $GITHUB_ENV
           echo "SOURCE_BRANCH=$SOURCE_BRANCH" >> $GITHUB_ENV
           echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
-          # Save the PR_DESCRIPTION to a file for multiline handling
-          echo "$PR_DESCRIPTION" > $GITHUB_WORKSPACE/pr_description.txt
+          echo "PR_DESCRIPTION=$PR_DESCRIPTION" >> $GITHUB_ENV
           echo "KEYWORDS=$EXTRACTED_KEYWORDS" >> $GITHUB_ENV
 
-      - name: Print extracted variables
-        run: |
-          echo "SOURCE_REPOSITORY=${{ env.SOURCE_REPOSITORY }}"
-          echo "SOURCE_BRANCH=${{ env.SOURCE_BRANCH }}"
-          echo "PR_TITLE=${{ env.PR_TITLE }}"
-          echo "PR_DESCRIPTION=$(cat $GITHUB_WORKSPACE/pr_description.txt)"
-          echo "${{env.KEYWORDS}}"
-          
       - name: Set up Git
         run: |
           git config --global credential.helper store
@@ -72,8 +69,7 @@ jobs:
                -H "Accept: application/vnd.github.v3+json" \
                https://api.github.com/repos/rvjain0510/test-workflow-dep/pulls?state=open \
                -o pulls.json
-      
-          # Loop through each pull request and get detailed information
+
           jq -c '.[]' pulls.json | while read i; do
             pr_number=$(echo $i | jq '.number')
             pr_title=$(echo $i | jq -r '.title')
@@ -83,26 +79,25 @@ jobs:
             pr_comments=$(curl -H "Authorization: token ${{ secrets.TESTY }}" \
                               -H "Accept: application/vnd.github.v3+json" \
                               https://api.github.com/repos/rvjain0510/test-workflow-dep/issues/$pr_number/comments | jq -c '.[] | {user: .user.login, comment: .body}')
-      
+
             echo "PR #$pr_number: $pr_title"
             echo "Body: $pr_body"
             echo "Comments: $pr_comments"
-      
+
             # Split keywords by space into an array
             IFS=' ' read -r -a keywords <<< "${{ env.KEYWORDS }}"
-      
+
             # Check if any keyword is present in the PR title
             keyword_found=false
             for keyword in "${keywords[@]}"; do
-            echo ""$keywords""
               if [[ "$pr_title" == *"$keyword"* ]]; then
                 echo "PR $pr_number has keyword: $keyword"
                 keyword_found=true
                 break
               fi
             done
+          done
 
-      
       - name: Create tag
         run: |
           # Clone the source repository
@@ -157,7 +152,6 @@ jobs:
          echo "PR_URL=$PR_URL" >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ secrets.TESTY }}
-
 
       - name: Comment on Issue with PR Link
         run: |
