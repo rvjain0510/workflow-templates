@@ -207,7 +207,6 @@ jobs:
       - name: Create release branch
         if: env.NEW_TAG_BFF
         run: |
-          env
           # Clone the source repository
           git clone https://${{ secrets.TESTY }}@github.com/${{ env.SOURCE_REPOSITORY }} repo
           cd repo
@@ -219,15 +218,46 @@ jobs:
           git push origin release/${{env.NEW_TAG_BFF}}
           git tag ${{env.NEW_TAG_BFF}}
           git push origin ${{env.NEW_TAG_BFF}}
-      - name: Update tag in YAML file
+          
+      - name: Update tags in YAML files
         run: |
           cd trepo
           git checkout main
           git pull origin main
-          git checkout -b qa/$(date +"%Y-%m-%d")
-          sed -i "s/^.*tag: .*/  tag: ${{ env.NEW_TAG }}/g" test.yaml
-          git commit -am "Update tag for ${{ env.KEYWORDS }}"
-          git push origin qa/$(date +"%Y-%m-%d")
+          
+          # Create a new branch based on today's date
+          BRANCH_NAME="qa/$(date +'%Y-%m-%d')"
+          git checkout -b $BRANCH_NAME
+          
+          # Define YAML files to process
+          YAML_FILES=("test.yaml" "test1.yaml")
+          
+          for FILE in "${YAML_FILES[@]}"; do
+            echo "Processing $FILE"
+            
+            # Update tags in each YAML file based on new tags created
+            if [ "${{ env.NEW_TAG_BFF }}" ]; then
+              sed -i "s/^.*tag: ax360-bff-v[0-9]\+\.[0-9]\+\.[0-9]\+/  tag: ${{ env.NEW_TAG_BFF }}/g" "$FILE"
+            fi
+            
+            if [ "${{ env.NEW_TAG_AX360 }}" ]; then
+              sed -i "s/^.*tag: ax360-webapp-v[0-9]\+\.[0-9]\+\.[0-9]\+/  tag: ${{ env.NEW_TAG_AX360 }}/g" "$FILE"
+            fi
+            
+            if [ "${{ env.NEW_TAG_KYC }}" ]; then
+              sed -i "s/^.*tag: iapw-kyc-v[0-9]\+\.[0-9]\+\.[0-9]\+/  tag: ${{ env.NEW_TAG_KYC }}/g" "$FILE"
+            fi
+            
+            if [ "${{ env.NEW_TAG_NOTIFICATION }}" ]; then
+              sed -i "s/^.*tag: iapw-notification-v[0-9]\+\.[0-9]\+\.[0-9]\+/  tag: ${{ env.NEW_TAG_NOTIFICATION }}/g" "$FILE"
+            fi
+          done
+          
+          # Commit the changes
+          git commit -am "Update tags for ${{ env.KEYWORDS }}"
+          
+          # Push the changes to the remote branch
+    git push origin $BRANCH_NAME
       - name: Create Pull Request
         id: create_pr
         run: |
