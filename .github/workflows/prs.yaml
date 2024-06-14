@@ -21,6 +21,9 @@ jobs:
           
           EXTRACTED_KEYWORDS=$(echo "$ISSUE_BODY" | awk '/### What kinds of M&Ms do you like?/{flag=1;next}/###/{flag=0}flag' | grep -oP '(?<=\[X\] ).*')
           
+          # Trim any leading/trailing whitespace
+          EXTRACTED_KEYWORDS=$(echo $EXTRACTED_KEYWORDS | xargs)
+          
           echo "Extracted Keywords: $EXTRACTED_KEYWORDS"
           
           # Set environment variable
