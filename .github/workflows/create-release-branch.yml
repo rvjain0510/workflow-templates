@@ -229,6 +229,7 @@ jobs:
           git push origin ${{env.NEW_TAG_NOTIFICATION}}      
           
       - name: Update tags in YAML files
+        if: env.NEW_TAG_KYC || env.NEW_TAG_NOTIFICATION || env.NEW_TAG_BFF
         run: |
           cd trepo
           git checkout main
