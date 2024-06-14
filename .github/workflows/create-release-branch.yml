@@ -58,6 +58,7 @@ jobs:
           echo "PR_TITLE=${{ env.PR_TITLE }}"
           echo "PR_DESCRIPTION=$(cat $GITHUB_WORKSPACE/pr_description.txt)"
           echo "${{env.KEYWORDS}}"
+          echo "${{env.PR_KEYWORDS}}"
           
       - name: Set up Git
         run: |
