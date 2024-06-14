@@ -123,27 +123,73 @@ jobs:
             echo "Comments: $pr_comments"
           done
 
-      - name: Create tag
+      - name: Create tags
         run: |
           # Clone the source repository
           git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow-dep trepo
           cd trepo
-          # Extract the tag from the YAML file using sed
-          TAG=$(sed -n 's/^.*tag: \(.*\)/\1/p' test.yaml | grep ax360-bff)
-          echo "Extracted tag: $TAG"
-          # Split the tag into components
-          IFS='-' read -r NAME VERSION <<< "$TAG"
-          IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
-          MAJOR=${VERSION_PARTS[0]}
-          MINOR=${VERSION_PARTS[1]}
-          PATCH=${VERSION_PARTS[2]}
-          # Increment the patch version
-          NEW_PATCH=$((PATCH + 1))
-          NEW_TAG="$NAME-$MAJOR.$MINOR.$NEW_PATCH"
-          echo "New tag: $NEW_TAG"
-          # Set environment variables
-          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
-
+      
+          # Define the YAML files you want to process
+          YAML_FILES=("test.yaml") # Add more files as needed
+      
+          # Define the shorthand mappings
+          declare -A SHORTHAND_MAP
+          SHORTHAND_MAP=(
+            ["BFF"]="ax360-bff"
+            ["AX360"]="ax360-webapp"
+          )
+      
+          # Define the shorthands you are interested in, separated by spaces
+          TARGET_SHORTHANDS= "${{env.KEYWORDS}}"
+      
+          for FILE in "${YAML_FILES[@]}"; do
+            echo "Processing $FILE"
+            # Extract tags from the YAML file
+            TAGS=$(grep -oP 'tag:\s*\K(ax360-[a-z]+-v\d+\.\d+\.\d+)' "$FILE")
+            
+            if [ -n "$TAGS" ]; then
+              while IFS= read -r TAG; do
+                echo "Extracted tag: $TAG"
+      
+                # Split the tag into components
+                IFS='-' read -r NAME VERSION <<< "$TAG"
+                if [[ " ${SHORTHAND_MAP[@]} " =~ " $NAME " ]]; then
+                  # Get the corresponding shorthand for the name
+                  SHORTHAND=""
+                  for key in "${!SHORTHAND_MAP[@]}"; do
+                    if [[ "${SHORTHAND_MAP[$key]}" == "$NAME" ]]; then
+                      SHORTHAND=$key
+                      break
+                    fi
+                  done
+      
+                  # Check if the shorthand is in the target list
+                  if [[ " $TARGET_SHORTHANDS " =~ " $SHORTHAND " ]]; then
+                    echo "Tag $TAG (shorthand $SHORTHAND) is in the target list."
+      
+                    IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
+                    MAJOR=${VERSION_PARTS[0]}
+                    MINOR=${VERSION_PARTS[1]}
+                    PATCH=${VERSION_PARTS[2]}
+                    
+                    # Increment the patch version
+                    NEW_PATCH=$((PATCH + 1))
+                    NEW_TAG="$NAME-$MAJOR.$MINOR.$NEW_PATCH"
+                    echo "New tag: $NEW_TAG"
+                    
+                    # Set environment variables
+                    echo "NEW_TAG_${FILE}_${NAME}=$NEW_TAG" >> $GITHUB_ENV
+                  else
+                    echo "Tag $TAG (shorthand $SHORTHAND) is not in the target list."
+                  fi
+                else
+                  echo "Tag $TAG (name $NAME) does not match any shorthand in the map."
+                fi
+              done <<< "$TAGS"
+            else
+              echo "No tags found in $FILE"
+            fi
+          done
       - name: Create release branch
         run: |
           # Clone the source repository
