@@ -127,8 +127,11 @@ jobs:
          log_error() {
            echo "ERROR: $1" >&2
                                 }
-          # Clone the source repository
-          git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow-dep trepo
+         git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow-dep trepo
+          cd trepo
+      
+          # Define the YAML files you want to process
+          YAML_FILES=("test.yaml") # Add more files as needed
             log_error "Failed to clone repository"
             exit 1
           cd trepo
