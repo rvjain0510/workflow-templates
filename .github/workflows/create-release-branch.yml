@@ -202,11 +202,11 @@ jobs:
           # Checkout the source branch
           git checkout ${{ env.SOURCE_BRANCH }}
           # Create and checkout the new release branch
-          git checkout -b release/${{ env.NEW_TAG }}
+          git checkout -b release/${{env.NEW_TAG_BFF}}
           # Push the new branch to origin
-          git push origin release/${{ env.NEW_TAG }}
-          git tag ${{ env.NEW_TAG }}
-          git push origin ${{ env.NEW_TAG }}
+          git push origin release/${{env.NEW_TAG_BFF}}
+          git tag ${{env.NEW_TAG_BFF}}
+          git push origin ${{env.NEW_TAG_BFF}}
       - name: Update tag in YAML file
         run: |
           cd trepo
