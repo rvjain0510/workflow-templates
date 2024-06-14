@@ -80,25 +80,31 @@ jobs:
           
           # Loop through each pull request and check for keywords
           jq -c '.[]' pulls.json | while read i; do
-            pr_number=$(echo $i | jq -r '.number')
-            pr_title=$(echo $i | jq -r '.title')
+            pr_number=$(echo "$i" | jq -r '.number')
+            pr_title=$(echo "$i" | jq -r '.title')
             
-            # Perform keyword check for each PR title
-            for keyword in "${keywords[@]}"; do
-              if echo "$pr_title" | grep -q "$keyword"; then
-                echo "PR #$pr_number titled '$pr_title' contains the keyword '$keyword'."
-          ISSUE_NUMBER=${{ github.event.issue.number }}
-          COMMENT_BODY="There is already a PR open for your service requested"
-          gh issue comment $ISSUE_NUMBER --body "$COMMENT_BODY"
-                exit 1  # Exit with a non-zero status to indicate found keywords
-              fi
-            done
-            
-            # Echo PR details (for illustration)
-            echo "PR #$pr_number: $pr_title"
+            # Check if [QA] is present in the PR title
+            if echo "$pr_title" | grep -q "\[QA\]"; then
+              # Perform keyword check for each PR title
+              for keyword in "${keywords[@]}"; do
+                if echo "$pr_title" | grep -q "$keyword"; then
+                  echo "PR #$pr_number titled '$pr_title' contains the keyword '$keyword'."
+                  
+                  # Assuming you want to take an action like commenting on an issue
+                  ISSUE_NUMBER=${{ github.event.issue.number }}
+                  COMMENT_BODY="There is already a PR open for your service requested"
+                  gh issue comment $ISSUE_NUMBER --body "$COMMENT_BODY"
+                  
+                  exit 1  # Exit with a non-zero status to indicate found keywords
+                fi
+              done
+              
+              # Echo PR details (for illustration)
+              echo "PR #$pr_number: $pr_title"
+            else
+              echo "PR #$pr_number titled '$pr_title' does not contain [QA]. Skipping keyword check."
+            fi
           done
-        env:
-          GITHUB_TOKEN: ${{ secrets.TESTY }}      
       - name: Get list of open pull requests
         run: |
           curl -H "Authorization: token ${{ secrets.TESTY }}" \
