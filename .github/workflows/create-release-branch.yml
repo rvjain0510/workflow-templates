@@ -232,7 +232,7 @@ jobs:
         id: create_pr
         run: |
          cd trepo
-         gh pr create --base main --head qa/$(date +"%Y-%m-%d") --title "${{ env.PR_KEYWORDS }}" --body "$(cat $GITHUB_WORKSPACE/pr_description.txt)"
+         gh pr create --base main --head qa/$(date +"%Y-%m-%d") --title "[QA]${{ env.PR_KEYWORDS }}" --body "$(cat $GITHUB_WORKSPACE/pr_description.txt)"
          PR_URL=$(gh pr view --json url -q .url)
          echo "PR_URL=$PR_URL" >> $GITHUB_ENV
         env:
