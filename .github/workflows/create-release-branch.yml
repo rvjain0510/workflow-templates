@@ -123,8 +123,14 @@ jobs:
           done
       - name: Create tags
         run: |
+         set -e  # Exit immediately if a command exits with a non-zero status
+         log_error() {
+           echo "ERROR: $1" >&2
+                                }
           # Clone the source repository
           git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow-dep trepo
+            log_error "Failed to clone repository"
+            exit 1
           cd trepo
       
           # Define the YAML files you want to process
