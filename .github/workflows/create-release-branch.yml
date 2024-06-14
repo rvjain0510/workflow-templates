@@ -126,9 +126,6 @@ jobs:
         run: |
           git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow-dep trepo
           cd trepo
-
-      - name: Process YAML files
-        run: |
           YAML_FILES=("test.yaml")
           declare -A SHORTHAND_MAP
           SHORTHAND_MAP=(
