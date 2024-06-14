@@ -36,13 +36,12 @@ jobs:
           EXTRACTED_KEYWORDS=$(echo "$ISSUE_BODY" | awk '/### Which repository you want to push/{flag=1;next}/###/{flag=0}flag' | grep -oP '(?<=\[X\] ).*')
           # Trim any leading/trailing whitespace
           EXTRACTED_KEYWORDS=$(echo $EXTRACTED_KEYWORDS | xargs)
-          PR_KEYWORDS=$(echo "$EXTRACTED_KEYWORDS" | awk '{print "[" $0 "]"}' | sed 's/ /]  [/g')
           echo "Extracted REPO: $REPO"
           echo "Extracted SOURCE_BRANCH: $SOURCE_BRANCH"
           echo "Extracted PR_TITLE: $PR_TITLE"
           echo "Extracted PR_DESCRIPTION: $PR_DESCRIPTION"
           echo "Extracted EXTRACTED_KEYWORDS: $EXTRACTED_KEYWORDS"
-          echo "Extracted PR_KEYWORDS: $PR_KEYWORDS"
+          # echo "Extracted PR_KEYWORDS: $PR_KEYWORDS"
           # Set environment variables
           echo "SOURCE_REPOSITORY=$REPO" >> $GITHUB_ENV
           echo "SOURCE_BRANCH=$SOURCE_BRANCH" >> $GITHUB_ENV
@@ -50,16 +49,13 @@ jobs:
           # Save the PR_DESCRIPTION to a file for multiline handling
           echo "$PR_DESCRIPTION" > $GITHUB_WORKSPACE/pr_description.txt
           echo "KEYWORDS=$EXTRACTED_KEYWORDS" >> $GITHUB_ENV
-          echo "PR_KEYWORDS=$PR_KEYWORDS" >> $GITHUB_ENV
       - name: Print extracted variables
         run: |
           echo "SOURCE_REPOSITORY=${{ env.SOURCE_REPOSITORY }}"
           echo "SOURCE_BRANCH=${{ env.SOURCE_BRANCH }}"
           echo "PR_TITLE=${{ env.PR_TITLE }}"
           echo "PR_DESCRIPTION=$(cat $GITHUB_WORKSPACE/pr_description.txt)"
-          echo "${{env.KEYWORDS}}"
-          echo "${{env.PR_KEYWORDS}}"
-          
+          echo "${{env.KEYWORDS}}"          
       - name: Set up Git
         run: |
           git config --global credential.helper store
