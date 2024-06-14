@@ -126,6 +126,57 @@ jobs:
         run: |
           git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow-dep trepo
           cd trepo
+          declare -A SHORTHAND_MAP
+          SHORTHAND_MAP["ax360-bff"]="BFF"
+          SHORTHAND_MAP["ax360-webapp"]="AX360"
+          
+          # List of YAML files to process
+          YAML_FILES=("test.yaml")
+          
+          # Target shorthands to look for
+          TARGET_SHORTHANDS=("BFF")
+          
+          # Loop through each YAML file
+          for FILE in "${YAML_FILES[@]}"; do
+            echo "Processing $FILE"
+            cat "$FILE"  # Print the contents of test.yaml for debugging
+          
+            # Example of processing tags in YAML
+            TAGS=$(grep -oP 'tag:\s*\K(ax360-[a-z]+-[a-z]+-v\d+\.\d+\.\d+)' "$FILE" || true)
+          
+            if [ -n "$TAGS" ]; then
+              while IFS= read -r TAG; do
+                echo "Extracted tag: $TAG"
+                NAME_VERSION="${TAG%-v*}"
+                VERSION="${TAG##*-v}"
+          
+                # Check if the NAME_VERSION is in the shorthand map
+                if [[ " ${SHORTHAND_MAP[@]} " =~ " $NAME_VERSION " ]]; then
+                  SHORTHAND=""
+                  for key in "${!SHORTHAND_MAP[@]}"; do
+                    if [[ "${SHORTHAND_MAP[$key]}" == "$NAME_VERSION" ]]; then
+                      SHORTHAND=$key
+                      break
+                    fi
+                  done
+          
+                  # Check if the shorthand is in the target list
+                  if [[ " ${TARGET_SHORTHANDS[@]} " =~ " $SHORTHAND " ]]; then
+                    echo "Tag $TAG (shorthand $SHORTHAND) is in the target list."
+                    # Example of further processing based on the shorthand
+                  else
+                    echo "Tag $TAG (shorthand $SHORTHAND) is not in the target list."
+                    # Handle if necessary
+                  fi
+                else
+                  echo "Tag $TAG (name $NAME_VERSION) does not match any shorthand in the map."
+                  # Handle if necessary
+                fi
+              done <<< "$TAGS"
+            else
+              echo "No tags found in $FILE"
+            fi
+          done
           YAML_FILES=("test.yaml")
           declare -A SHORTHAND_MAP
           SHORTHAND_MAP=(
