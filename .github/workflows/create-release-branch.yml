@@ -94,8 +94,9 @@ jobs:
             # Check if any keyword is present in the PR title
             keyword_found=false
             for keyword in "${keywords[@]}"; do
+            echo ""$keywords""
               if [[ "$pr_title" == *"$keyword"* ]]; then
-                echo "PR #$pr_number has keyword: $keyword"
+                echo "PR $pr_number has keyword: $keyword"
                 keyword_found=true
                 break
               fi
