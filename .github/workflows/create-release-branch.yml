@@ -33,7 +33,10 @@ jobs:
           PR_TITLE=$(echo "$ISSUE_JSON" | jq -r 'index("### Pull Request Title") as $idx | .[$idx + 1]')
           # Extracting pull request description (includes spaces and lines)
           PR_DESCRIPTION=$(echo "$ISSUE_BODY" | awk '/### Pull Request Description/{flag=1;next}/###/{flag=0}flag' | sed 's/^ *//;s/ *$//')
-
+          GREEN_MM=$(echo "$ISSUE_BODY" | grep -c "\[X\] Green")
+          ORANGE_MM=$(echo "$ISSUE_BODY" | grep -c "\[X\] Orange")
+          RED_MM=$(echo "$ISSUE_BODY" | grep -c "\[X\] Red")
+          YELLOW_MM=$(echo "$ISSUE_BODY" | grep -c "\[X\] Yellow")
           echo "Extracted REPO: $REPO"
           echo "Extracted SOURCE_BRANCH: $SOURCE_BRANCH"
           echo "Extracted PR_TITLE: $PR_TITLE"
@@ -43,7 +46,10 @@ jobs:
           echo "SOURCE_REPOSITORY=$REPO" >> $GITHUB_ENV
           echo "SOURCE_BRANCH=$SOURCE_BRANCH" >> $GITHUB_ENV
           echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
-          
+          echo "GREEN_MM=$GREEN_MM" >> $GITHUB_ENV
+          echo "ORANGE_MM=$ORANGE_MM" >> $GITHUB_ENV
+          echo "RED_MM=$RED_MM" >> $GITHUB_ENV
+          echo "YELLOW_MM=$YELLOW_MM" >> $GITHUB_ENV
           # Save the PR_DESCRIPTION to a file for multiline handling
           echo "$PR_DESCRIPTION" > $GITHUB_WORKSPACE/pr_description.txt
 
@@ -53,7 +59,10 @@ jobs:
           echo "SOURCE_BRANCH=${{ env.SOURCE_BRANCH }}"
           echo "PR_TITLE=${{ env.PR_TITLE }}"
           echo "PR_DESCRIPTION=$(cat $GITHUB_WORKSPACE/pr_description.txt)"
-
+          echo "GREEN_MM=${{ env.GREEN_MM }}"
+          echo "ORANGE_MM=${{ env.ORANGE_MM }}"
+          echo "RED_MM=${{ env.RED_MM }}"
+          echo "YELLOW_MM=${{ env.YELLOW_MM }}"
       - name: Set up Git
         run: |
           git config --global credential.helper store
