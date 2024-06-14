@@ -62,6 +62,13 @@ jobs:
 
       - name: Create tag
         run: |
+          curl -H "Authorization: token ${{ secrets.TESTY }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/rvjain0510/test-workflow-dep/pulls?state=open
+          gh pr list --state open --json title,number,url
+
+      - name: Create tag
+        run: |
           # Clone the source repository
           git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow-dep trepo
           cd trepo
