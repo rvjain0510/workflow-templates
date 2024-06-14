@@ -215,15 +215,15 @@ jobs:
           cd trepo
           git checkout main
           git pull origin main
-          git checkout -b qa/$(date +"%Y-%m-%d_%H-%M-%S")
+          git checkout -b qa/$(date +"%Y-%m-%d")
           sed -i "s/^.*tag: .*/  tag: ${{ env.NEW_TAG }}/g" test.yaml
           git commit -am "Update tag for ${{ env.KEYWORDS }}"
-          git push origin qa/$(date +"%Y-%m-%d_%H-%M-%S")
+          git push origin qa/$(date +"%Y-%m-%d")
       - name: Create Pull Request
         id: create_pr
         run: |
          cd trepo
-         gh pr create --base main --head qa/$(date +"%Y-%m-%d_%H-%M-%S") --title "${{ env.PR_KEYWORDS }}" --body "$(cat $GITHUB_WORKSPACE/pr_description.txt)"
+         gh pr create --base main --head qa/$(date +"%Y-%m-%d") --title "${{ env.PR_KEYWORDS }}" --body "$(cat $GITHUB_WORKSPACE/pr_description.txt)"
          PR_URL=$(gh pr view --json url -q .url)
          echo "PR_URL=$PR_URL" >> $GITHUB_ENV
         env:
