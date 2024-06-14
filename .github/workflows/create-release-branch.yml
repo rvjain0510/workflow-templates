@@ -129,8 +129,8 @@ jobs:
           YAML_FILES=("test.yaml")
           declare -A SHORTHAND_MAP
           SHORTHAND_MAP=(
-            ["BFF"]="ax360-bff"
-            ["AX360"]="ax360-webapp"
+            ["ax360-bff"]="BFF"
+            ["ax360-webapp"]="AX360"
           )
           TARGET_SHORTHANDS="BFF"
 
