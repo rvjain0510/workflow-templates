@@ -1,1 +1,19 @@
+name: PR
 
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  create-release-branch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Print issue body
+        run: |
+          echo "Issue Body:"
+          echo "${{ github.event.issue.body }}"
+          ISSUE_BODY="${{ github.event.issue.body }}"
