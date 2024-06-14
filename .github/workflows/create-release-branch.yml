@@ -36,13 +36,13 @@ jobs:
           EXTRACTED_KEYWORDS=$(echo "$ISSUE_BODY" | awk '/### Which repository you want to push/{flag=1;next}/###/{flag=0}flag' | grep -oP '(?<=\[X\] ).*')
           # Trim any leading/trailing whitespace
           EXTRACTED_KEYWORDS=$(echo $EXTRACTED_KEYWORDS | xargs)
-          PR_KEYWORDS=$(echo "$EXTRACTED_KEYWORDS" | awk '{print "[" $0 "]"}' | sed 's/ /]  [/g')
+          PR_KEYWORDS="[${KEYWORDS// /] [}]"
+          echo "Extracted Keywords: $EXTRACTED_KEYWORDS"
           echo "Extracted REPO: $REPO"
           echo "Extracted SOURCE_BRANCH: $SOURCE_BRANCH"
           echo "Extracted PR_TITLE: $PR_TITLE"
           echo "Extracted PR_DESCRIPTION: $PR_DESCRIPTION"
           echo "Extracted EXTRACTED_KEYWORDS: $EXTRACTED_KEYWORDS"
-          echo "Extracted PR_KEYWORDS: $PR_KEYWORDS"
           # Set environment variables
           echo "SOURCE_REPOSITORY=$REPO" >> $GITHUB_ENV
           echo "SOURCE_BRANCH=$SOURCE_BRANCH" >> $GITHUB_ENV
@@ -123,14 +123,13 @@ jobs:
           done
       - name: Create tags
         run: |
-         set -e  # Exit immediately if a command exits with a non-zero status
-         log_error() {
-           echo "ERROR: $1" >&2
-                                }
-         git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow-dep trepo
+          # Clone the source repository
+          git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow-dep trepo
           cd trepo
-          YAML_FILES=("test.yaml") # Add more files as needed
-          
+      
+          # Define the YAML files you want to process
+          YAML_FILES=("test.yaml" "test1.yaml") # Add more files as needed
+      
           # Define the shorthand mappings
           declare -A SHORTHAND_MAP=(
             ["BFF"]="ax360-bff"
@@ -138,34 +137,25 @@ jobs:
             ["KYC"]="iapw-kyc"
             ["NOTIFICATION"]="iapw-notification"
           )
-          
+      
           # Define the shorthands you are interested in, separated by spaces
-          TARGET_SHORTHANDS="KYC NOTIFICATION AX360 BFF"
-          
+          TARGET_SHORTHANDS="${{ env.KEYWORDS }}"
+      
           for FILE in "${YAML_FILES[@]}"; do
-            if [[ ! -f "$FILE" ]]; then
-              log_error "File $FILE does not exist"
-              continue
-            fi
-            
             echo "Processing $FILE"
             # Extract tags from the YAML file
-            TAGS=$(grep -oP 'tag:\s*\K([a-z]-[a-z]+-v\d+\.\d+\.\d+)' "$FILE") || {
-              log_error "Failed to extract tags from $FILE"
-              continue
-            }
-          
-            if [[ -n "$TAGS" ]]; then
-              while IFS= read -r TAG; do
-                echo "Extracted tag: $TAG"
-          
-                # Extract NAME and VERSION from the tag
-                NAME=$(echo "$TAG" | cut -d'-' -f1-2)
-                VERSION=$(echo "$TAG" | cut -d'-' -f3-)
-          
-                echo "NAME: $NAME"
-                echo "VERSION: $VERSION"
-          
+              TAGS=$(grep -oP 'tag:\s*\K((ax360-[a-z]+-v\d+\.\d+\.\d+)|(iapw-[a-z]+-v\d+\.\d+\.\d+))' "$FILE")            
+                if [ -n "$TAGS" ]; then
+                while IFS= read -r TAG; do
+                  echo "Extracted tag: $TAG"
+            
+                  # Extract NAME and VERSION from the tag
+                  NAME=$(echo "$TAG" | cut -d'-' -f1-2)
+                  VERSION=$(echo "$TAG" | cut -d'-' -f3-)
+            
+                  echo "NAME: $NAME"
+                  echo "VERSION: $VERSION"
+
                 if [[ " ${SHORTHAND_MAP[@]} " =~ " $NAME " ]]; then
                   # Get the corresponding shorthand for the name
                   SHORTHAND=""
@@ -175,34 +165,25 @@ jobs:
                       break
                     fi
                   done
-          
-                  if [[ -z "$SHORTHAND" ]]; then
-                    log_error "Failed to find shorthand for $NAME"
-                    continue
-                  fi
-          
+      
                   # Check if the shorthand is in the target list
                   if [[ " $TARGET_SHORTHANDS " =~ " $SHORTHAND " ]]; then
                     echo "Tag $TAG (shorthand $SHORTHAND) is in the target list."
-          
+      
                     IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
                     MAJOR=${VERSION_PARTS[0]}
                     MINOR=${VERSION_PARTS[1]}
                     PATCH=${VERSION_PARTS[2]}
-          
-                    if [[ -z "$PATCH" ]]; then
-                      log_error "Failed to parse version $VERSION for tag $TAG"
-                      continue
-                    fi
-          
+                    
                     # Increment the patch version
                     NEW_PATCH=$((PATCH + 1))
                     NEW_TAG="$NAME-$MAJOR.$MINOR.$NEW_PATCH"
                     echo "New tag: $NEW_TAG"
-          
-                    # Set environment variables for GitHub Actions
+                    
+                    # Set environment variables
                     echo "NEW_TAG_$SHORTHAND=$NEW_TAG" >> $GITHUB_ENV
-                    echo ""
+                    echo "${{env.NEW_TAG_BFF}}"
+                    
                   else
                     echo "Tag $TAG (shorthand $SHORTHAND) is not in the target list."
                   fi
@@ -215,7 +196,7 @@ jobs:
             fi
           done
 
-      - name: Create release branch for BFF
+      - name: Create release branch
         if: env.NEW_TAG_BFF
         run: |
           env
@@ -230,23 +211,6 @@ jobs:
           git push origin release/${{env.NEW_TAG_BFF}}
           git tag ${{env.NEW_TAG_BFF}}
           git push origin ${{env.NEW_TAG_BFF}}
-          
-      - name: Create release branch for KYC
-        if: env.NEW_TAG_KYC
-        run: |
-          env
-          # Clone the source repository
-          git clone https://${{ secrets.TESTY }}@github.com/${{ env.SOURCE_REPOSITORY }} repo
-          cd repo
-          # Checkout the source branch
-          git checkout ${{ env.SOURCE_BRANCH }}
-          # Create and checkout the new release branch
-          git checkout -b release/${{env.NEW_TAG_BFF}}
-          # Push the new branch to origin
-          git push origin release/${{env.NEW_TAG_BFF}}
-          git tag ${{env.NEW_TAG_BFF}}
-          git push origin ${{env.NEW_TAG_BFF}}      
-          
       - name: Update tag in YAML file
         run: |
           cd trepo
