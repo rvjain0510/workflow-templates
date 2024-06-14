@@ -140,7 +140,7 @@ jobs:
           )
       
           # Define the shorthands you are interested in, separated by spaces
-          TARGET_SHORTHANDS= "${{env.KEYWORDS}}"
+          TARGET_SHORTHANDS="${{ env.KEYWORDS }}"
       
           for FILE in "${YAML_FILES[@]}"; do
             echo "Processing $FILE"
@@ -190,6 +190,7 @@ jobs:
               echo "No tags found in $FILE"
             fi
           done
+
       - name: Create release branch
         run: |
           # Clone the source repository
