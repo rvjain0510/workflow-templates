@@ -132,10 +132,11 @@ jobs:
             ["BFF"]="ax360-bff"
             ["AX360"]="ax360-webapp"
           )
-          TARGET_SHORTHANDS="${{env.KEYWORDS}}"
+          TARGET_SHORTHANDS="BFF"
 
           for FILE in "${YAML_FILES[@]}"; do
             echo "Processing $FILE"
+            cat "$FILE"  # Print the contents of test.yaml for debugging
             TAGS=$(grep -oP 'tag:\s*\K(ax360-[a-z]+-[a-z]+-v\d+\.\d+\.\d+)' "$FILE" || true)
             
             if [ -n "$TAGS" ]; then
