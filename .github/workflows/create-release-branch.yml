@@ -33,10 +33,10 @@ jobs:
           PR_TITLE=$(echo "$ISSUE_JSON" | jq -r 'index("### Pull Request Title") as $idx | .[$idx + 1]')
           # Extracting pull request description (includes spaces and lines)
           PR_DESCRIPTION=$(echo "$ISSUE_BODY" | awk '/### Pull Request Description/{flag=1;next}/###/{flag=0}flag' | sed 's/^ *//;s/ *$//')
-          GREEN_MM=$(echo "$ISSUE_BODY" | grep -c "\[X\] Green")
-          ORANGE_MM=$(echo "$ISSUE_BODY" | grep -c "\[X\] Orange")
-          RED_MM=$(echo "$ISSUE_BODY" | grep -c "\[X\] Red")
-          YELLOW_MM=$(echo "$ISSUE_BODY" | grep -c "\[X\] Yellow")
+          # GREEN_MM=$(echo "$ISSUE_BODY" | grep -c "\[X\] Green")
+          # ORANGE_MM=$(echo "$ISSUE_BODY" | grep -c "\[X\] Orange")
+          # RED_MM=$(echo "$ISSUE_BODY" | grep -c "\[X\] Red")
+          # YELLOW_MM=$(echo "$ISSUE_BODY" | grep -c "\[X\] Yellow")
           echo "Extracted REPO: $REPO"
           echo "Extracted SOURCE_BRANCH: $SOURCE_BRANCH"
           echo "Extracted PR_TITLE: $PR_TITLE"
