@@ -64,7 +64,38 @@ jobs:
           git config --global credential.helper store
           git config --global user.email "jainrv0510@gmail.com"
           git config --global user.name "rvjain0510"
+          
+      - name: Get list of open pull requests
+        run: |
+          # Fetch open pull requests from GitHub API
+          curl -sSf -H "Authorization: token ${{ secrets.TESTY }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               https://api.github.com/repos/rvjain0510/test-workflow-dep/pulls?state=open \
+               -o pulls.json
 
+      - name: Check PR titles for keywords
+        run: |
+          # Read keywords from the environment variable
+          IFS=' ' read -r -a keywords <<< "${{ env.KEYWORDS }}"
+          
+          # Loop through each pull request and check for keywords
+          jq -c '.[]' pulls.json | while read i; do
+            pr_number=$(echo $i | jq -r '.number')
+            pr_title=$(echo $i | jq -r '.title')
+            
+            # Perform keyword check for each PR title
+            for keyword in "${keywords[@]}"; do
+              if echo "$pr_title" | grep -q "$keyword"; then
+                echo "PR #$pr_number titled '$pr_title' contains the keyword '$keyword'."
+                # Optionally, you can take action here if keywords are found
+                # For example, send notifications, exit with a status code, etc.
+                exit 1  # Exit with a non-zero status to indicate found keywords
+              fi
+            done
+            
+            # Echo PR details (for illustration)
+            echo "PR #$pr_number: $pr_title"
+          done
       - name: Get list of open pull requests
         run: |
           curl -H "Authorization: token ${{ secrets.TESTY }}" \
