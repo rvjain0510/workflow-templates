@@ -87,8 +87,9 @@ jobs:
             for keyword in "${keywords[@]}"; do
               if echo "$pr_title" | grep -q "$keyword"; then
                 echo "PR #$pr_number titled '$pr_title' contains the keyword '$keyword'."
-                # Optionally, you can take action here if keywords are found
-                # For example, send notifications, exit with a status code, etc.
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+          COMMENT_BODY="There is already a PR open for your service requested"
+          gh issue comment $ISSUE_NUMBER --body "$COMMENT_BODY"
                 exit 1  # Exit with a non-zero status to indicate found keywords
               fi
             done
@@ -96,6 +97,8 @@ jobs:
             # Echo PR details (for illustration)
             echo "PR #$pr_number: $pr_title"
           done
+        env:
+          GITHUB_TOKEN: ${{ secrets.TESTY }}      
       - name: Get list of open pull requests
         run: |
           curl -H "Authorization: token ${{ secrets.TESTY }}" \
