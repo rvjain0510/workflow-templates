@@ -40,7 +40,7 @@ jobs:
           PR_DESCRIPTION=$(echo "$ISSUE_BODY" | awk '/### Pull Request Description/{flag=1;next}/###/{flag=0}flag' | sed 's/^ *//;s/ *$//')
           
           # Extracting keywords
-          EXTRACTED_KEYWORDS=$(echo "$ISSUE_BODY" | awk '/### Keywords/{flag=1;next}/###/{flag=0}flag' | grep -oP '(?<=\[X\] ).*')
+          EXTRACTED_KEYWORDS=$(echo "$ISSUE_BODY" | awk '/### Which repository you want to push/{flag=1;next}/###/{flag=0}flag' | grep -oP '(?<=\[X\] ).*')
           EXTRACTED_KEYWORDS=$(echo $EXTRACTED_KEYWORDS | xargs)
           
           echo "Extracted Keywords: $EXTRACTED_KEYWORDS"
