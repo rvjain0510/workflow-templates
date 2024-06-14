@@ -100,13 +100,6 @@ jobs:
                 break
               fi
             done
-      
-            # Perform actions if keyword is found in PR title
-            if [ "$keyword_found" = true ]; then
-              # Perform actions specific to matching PRs if needed
-              # For example, set environment variables, trigger another workflow, etc.
-            fi
-          done
 
       
       - name: Create tag
