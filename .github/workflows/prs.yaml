@@ -1,4 +1,4 @@
-name: PR
+name: Create Release Branch
 
 on:
   issues:
@@ -12,8 +12,42 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v2
 
-      - name: Print issue body
+      - name: Extract issue information
+        id: extract
         run: |
-          echo "Issue Body:"
-          echo "${{ github.event.issue.body }}"
           ISSUE_BODY="${{ github.event.issue.body }}"
+          echo "Issue Body:"
+          echo "$ISSUE_BODY"
+          
+          # Parse checkbox values from the issue body
+          KEYWORDS=$(echo "$ISSUE_BODY" | awk '/- \[ \] Keywords:/{flag=1;next}/- \[x\] Keywords:/{flag=1;next}/- \[X\] Keywords:/{flag=1;next}/- \[X\] Keywords:/{flag=1;next}flag' | sed 's/^ *//;s/ *$//')
+          echo "Extracted Keywords: $KEYWORDS"
+          
+          # Set environment variable
+          echo "KEYWORDS=$KEYWORDS" >> $GITHUB_ENV
+
+      - name: Check for open PRs with specific keywords
+        id: check_open_prs
+        run: |
+          # Convert keywords to array
+          IFS=',' read -r -a KEYWORDS_ARRAY <<< "$KEYWORDS"
+          
+          # Fetch open PRs and filter by each keyword
+          OPEN_PR_COUNT=0
+          for keyword in "${KEYWORDS_ARRAY[@]}"; do
+            PR_COUNT=$(curl -s -H "Authorization: token ${{ secrets.TESTY }}" \
+                       -H "Accept: application/vnd.github.v3+json" \
+                       "https://api.github.com/repos/${{ github.repository }}/pulls?state=open" \
+                       | jq ".[] | select(.title | test(\"$keyword\")) | .number" \
+                       | wc -l)
+            OPEN_PR_COUNT=$((OPEN_PR_COUNT + PR_COUNT))
+          done
+          
+          echo "Open PRs with keywords '$KEYWORDS': $OPEN_PR_COUNT"
+          echo "::set-output name=open_pr_count::$OPEN_PR_COUNT"
+
+      - name: Check if there are open PRs
+        if: steps.check_open_prs.outputs.open_pr_count != '0'
+        run: |
+          echo "There are open PRs with the keywords. Skipping release branch creation."
+          exit 0  # Exit successfully to skip further steps
