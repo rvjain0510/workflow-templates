@@ -122,31 +122,29 @@ jobs:
             echo "Body: $pr_body"
             echo "Comments: $pr_comments"
           done
-
-      - name: Create tags
+      - name: Clone repository
         run: |
-          set -x  # Enable debug output
           git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow-dep trepo
           cd trepo
-      
+
+      - name: Process YAML files
+        run: |
           YAML_FILES=("test.yaml")
-      
           declare -A SHORTHAND_MAP
           SHORTHAND_MAP=(
             ["BFF"]="ax360-bff"
             ["AX360"]="ax360-webapp"
           )
-      
           TARGET_SHORTHANDS="${{env.KEYWORDS}}"
-      
+
           for FILE in "${YAML_FILES[@]}"; do
             echo "Processing $FILE"
-            TAGS=$(grep -oP 'tag:\s*\K(ax360-[a-z]+-[a-z]+-v\d+\.\d+\.\d+)' "$FILE")
+            TAGS=$(grep -oP 'tag:\s*\K(ax360-[a-z]+-[a-z]+-v\d+\.\d+\.\d+)' "$FILE" || true)
             
             if [ -n "$TAGS" ]; then
               while IFS= read -r TAG; do
                 echo "Extracted tag: $TAG"
-      
+
                 NAME_VERSION="${TAG%-v*}"
                 VERSION="${TAG##*-v}"
                 
@@ -158,10 +156,10 @@ jobs:
                       break
                     fi
                   done
-      
+
                   if [[ " $TARGET_SHORTHANDS " =~ " $SHORTHAND " ]]; then
                     echo "Tag $TAG (shorthand $SHORTHAND) is in the target list."
-      
+
                     IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
                     MAJOR=${VERSION_PARTS[0]}
                     MINOR=${VERSION_PARTS[1]}
