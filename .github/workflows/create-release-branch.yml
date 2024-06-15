@@ -4,6 +4,9 @@ name: QA DEPLOYMENT
 on:
   issues:
     types: [opened]
+    tags:
+      - release
+
 
 jobs:
   create-release-branch:
