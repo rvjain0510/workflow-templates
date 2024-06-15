@@ -1,4 +1,4 @@
-name: Create Release Branch
+name: QA DEPLOYMENT
 
 
 on:
@@ -31,7 +31,7 @@ jobs:
           echo "Extracted EXTRACTED_KEYWORDS: $EXTRACTED_KEYWORDS"
           # Set environment variables
           # Save the PR_DESCRIPTION to a file for multiline handling
-          echo "$PR_DESCRIPTION" > $GITHUB_WORKSPACE/pr_description.txt
+          echo "$PR_DESCRIPTION" > $GITHUB_WORKSPACE/pr_description.json
           echo "KEYWORDS=$EXTRACTED_KEYWORDS" >> $GITHUB_ENV
           echo "PR_KEYWORDS=$PR_KEYWORDS" >> $GITHUB_ENV
       - name: Print extracted variables
@@ -273,7 +273,7 @@ jobs:
         id: create_pr
         run: |
          cd trepo
-         gh pr create --base main --head qa/$(date +"%Y-%m-%d")_${{ github.event.issue.number }} --title "[QA]${{ env.PR_KEYWORDS }}" --body "$(cat $GITHUB_WORKSPACE/pr_description.txt)"
+         gh pr create --base main --head qa/$(date +"%Y-%m-%d")_${{ github.event.issue.number }} --title "[QA]${{ env.PR_KEYWORDS }}" --body "$(cat $GITHUB_WORKSPACE/pr_description.json)"
          PR_URL=$(gh pr view --json url -q .url)
          echo "PR_URL=$PR_URL" >> $GITHUB_ENV
         env:
