@@ -56,9 +56,9 @@ body:
 
         ## Checklist
         <!-- Ensure all the following tasks are completed -->
-          - [ ] Code is up to date with the base branch
-          - [ ] Tests have been added or updated
-          - [ ] Documentation has been updated (if necessary)
-          - [ ] Related issues have been linked
+        - [ ] Code is up to date with the base branch
+        - [ ] Tests have been added or updated
+        - [ ] Documentation has been updated (if necessary)
+        - [ ] Related issues have been linked
     validations:
-    required: true
+      required: true
