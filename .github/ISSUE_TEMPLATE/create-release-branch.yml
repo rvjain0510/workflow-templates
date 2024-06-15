@@ -28,5 +28,7 @@ body:
       label: Pull Request Description
       description: "A detailed description of the pull request."
       placeholder: "This pull request includes the following changes..."
+      value :
+      hello
     validations:
       required: true
