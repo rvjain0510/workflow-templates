@@ -22,13 +22,43 @@ body:
     validations:
       required: true
  
-  - type: textarea
+- type: textarea
     id: pr-description
     attributes:
       label: Pull Request Description
-      description: "A detailed description of the pull request."
-      placeholder: "This pull request includes the following changes..."
-      value :
-      hello
+      description: A detailed description of the pull request.
+      placeholder: |
+        ## Summary
+        <!-- Provide a summary of the changes included in this pull request -->
+
+        ## Changes
+        <!-- List the major changes made in this pull request -->
+        - Change 1: [Description of change 1]
+        - Change 2: [Description of change 2]
+        - Change 3: [Description of change 3]
+
+        ## Motivation
+        <!-- Explain why these changes are being made -->
+
+        ## Related Issues
+        <!-- List any related issues or tickets that this pull request addresses -->
+        - Issue 1: [Link to issue 1]
+        - Issue 2: [Link to issue 2]
+
+        ## Testing
+        <!-- Describe the testing steps that were performed to verify the changes -->
+        1. [Testing step 1]
+        2. [Testing step 2]
+        3. [Testing step 3]
+
+        ## Screenshots (if applicable)
+        <!-- Include screenshots if the changes involve UI updates -->
+
+        ## Checklist
+        <!-- Ensure all the following tasks are completed -->
+        - [ ] Code is up to date with the base branch
+        - [ ] Tests have been added or updated
+        - [ ] Documentation has been updated (if necessary)
+        - [ ] Related issues have been linked
     validations:
       required: true
