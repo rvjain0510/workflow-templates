@@ -24,6 +24,13 @@ jobs:
           # Convert issue body to JSON format
           ISSUE_JSON=$(echo "$ISSUE_BODY" | jq -R -s 'split("\n") | map(select(. != ""))')
 
+          ISSUE_BODY="${{ github.event.issue.body }}"
+          echo "ISSUE_BODY content:"
+          echo "$ISSUE_BODY"
+
+          # Convert issue body to JSON format
+          ISSUE_JSON=$(echo "$ISSUE_BODY" | jq -R -s 'split("\n") | map(select(. != ""))')
+
           # Extracting pull request description (includes spaces and lines)
           PR_DESCRIPTION=$(echo "$ISSUE_BODY" | awk '/### Pull Request Description/{flag=1;next}/###/{flag=0}flag' | sed 's/^ *//;s/ *$//')
 
@@ -32,37 +39,43 @@ jobs:
           EXTRACTED_KEYWORDS=$(echo $EXTRACTED_KEYWORDS | xargs)
           PR_KEYWORDS=$(echo $EXTRACTED_KEYWORDS | sed 's/\([^ ]*\)/[\1] /g')
 
+          # Function to extract source branch with handling for "_No response_"
+          extract_source_branch() {
+            local branch_section="$1"
+            local section_name="$2"
+            local extracted_branch=$(echo "$branch_section" | sed '/^$/d')
+            
+            if [[ "$extracted_branch" == "_No response_" ]]; then
+              extracted_branch=""
+            fi
+            
+            echo "Extracted SOURCE_BRANCH_$section_name: '$extracted_branch'"
+            echo "SOURCE_BRANCH_$section_name=$extracted_branch" >> $GITHUB_ENV
+          }
+
           # Extracting Source Branch for KYC
-          SOURCE_BRANCH_KYC=$(echo "$ISSUE_BODY" | awk '/### Source Branch for KYC/{flag=1;next}/###/{flag=0}flag' | sed '/^$/d')
-          if [[ "$SOURCE_BRANCH_KYC" == "_No response_" ]]; then
-            SOURCE_BRANCH_KYC=""
-          fi
+          SOURCE_BRANCH_KYC=$(echo "$ISSUE_BODY" | awk '/### Source Branch for KYC/{flag=1;next}/###/{flag=0}flag')
+          extract_source_branch "$SOURCE_BRANCH_KYC" "KYC"
 
           # Extracting Source Branch for Notification
-          SOURCE_BRANCH_NOTIFICATION=$(echo "$ISSUE_BODY" | awk '/### Source Branch for Notification/{flag=1;next}/###/{flag=0}flag' | sed '/^$/d')
-          if [[ "$SOURCE_BRANCH_NOTIFICATION" == "_No response_" ]]; then
-            SOURCE_BRANCH_NOTIFICATION=""
-          fi
+          SOURCE_BRANCH_NOTIFICATION=$(echo "$ISSUE_BODY" | awk '/### Source Branch for Notification/{flag=1;next}/###/{flag=0}flag')
+          extract_source_branch "$SOURCE_BRANCH_NOTIFICATION" "NOTIFICATION"
+
+          # Extracting Source Branch for AX360
+          SOURCE_BRANCH_AX360=$(echo "$ISSUE_BODY" | awk '/### Source Branch for AX360/{flag=1;next}/###/{flag=0}flag')
+          extract_source_branch "$SOURCE_BRANCH_AX360" "AX360"
+
+          # Extracting Source Branch for BFF
+          SOURCE_BRANCH_BFF=$(echo "$ISSUE_BODY" | awk '/### Source Branch for BFF/{flag=1;next}/###/{flag=0}flag')
+          extract_source_branch "$SOURCE_BRANCH_BFF" "BFF"
 
           echo "Extracted PR_DESCRIPTION: $PR_DESCRIPTION"
           echo "Extracted EXTRACTED_KEYWORDS: $EXTRACTED_KEYWORDS"
-          echo "Extracted SOURCE_BRANCH_KYC: '$SOURCE_BRANCH_KYC'"
-          echo "Extracted SOURCE_BRANCH_NOTIFICATION: '$SOURCE_BRANCH_NOTIFICATION'"
 
-          # Set environment variables
+          # Set PR_DESCRIPTION and EXTRACTED_KEYWORDS as environment variables
           echo "$PR_DESCRIPTION" > $GITHUB_WORKSPACE/pr_description.json
           echo "KEYWORDS=$EXTRACTED_KEYWORDS" >> $GITHUB_ENV
           echo "PR_KEYWORDS=$PR_KEYWORDS" >> $GITHUB_ENV
-
-          # Set SOURCE_BRANCH_KYC if not empty
-          if [ -n "$SOURCE_BRANCH_KYC" ]; then
-            echo "SOURCE_BRANCH_KYC=$SOURCE_BRANCH_KYC" >> $GITHUB_ENV
-          fi
-
-          # Set SOURCE_BRANCH_NOTIFICATION if not empty
-          if [ -n "$SOURCE_BRANCH_NOTIFICATION" ]; then
-            echo "SOURCE_BRANCH_NOTIFICATION=$SOURCE_BRANCH_NOTIFICATION" >> $GITHUB_ENV
-          fi
 
 
       - name: Print extracted variables
@@ -93,8 +106,8 @@ jobs:
             pr_number=$(echo "$i" | jq -r '.number')
             pr_title=$(echo "$i" | jq -r '.title')
             
-            # Check if [QA] is present in the PR title
-            if echo "$pr_title" | grep -q "\[QA\]"; then
+            # Check if [AU] is present in the PR title
+            if echo "$pr_title" | grep -q "\[AU\]"; then
               # Perform keyword check for each PR title
               for keyword in "${keywords[@]}"; do
                 if echo "$pr_title" | grep -q "$keyword"; then
@@ -112,7 +125,7 @@ jobs:
               # Echo PR details (for illustration)
               echo "PR #$pr_number: $pr_title"
             else
-              echo "PR #$pr_number titled '$pr_title' does not contain [QA]. Skipping keyword check."
+              echo "PR #$pr_number titled '$pr_title' does not contain [AU]. Skipping keyword check."
             fi
           done
         env:
@@ -267,7 +280,7 @@ jobs:
           git pull origin main
           
           # Create a new branch based on today's date
-          BRANCH_NAME="qa/$(date +'%Y-%m-%d')_${{ github.event.issue.number }}"
+          BRANCH_NAME="au/$(date +'%Y-%m-%d')_${{ github.event.issue.number }}"
           git checkout -b $BRANCH_NAME
           
           # Define YAML files to process
@@ -304,7 +317,7 @@ jobs:
         id: create_pr
         run: |
          cd trepo
-         gh pr create --base main --head qa/$(date +"%Y-%m-%d")_${{ github.event.issue.number }} --title "[QA]${{ env.PR_KEYWORDS }}" --body "$(cat $GITHUB_WORKSPACE/pr_description.json)"
+         gh pr create --base main --head au/$(date +"%Y-%m-%d")_${{ github.event.issue.number }} --title "[AU]${{ env.PR_KEYWORDS }}" --body "$(cat $GITHUB_WORKSPACE/pr_description.json)"
          PR_URL=$(gh pr view --json url -q .url)
          echo "PR_URL=$PR_URL" >> $GITHUB_ENV
         env:
