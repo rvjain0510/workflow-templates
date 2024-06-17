@@ -40,7 +40,7 @@ jobs:
             fi
             
             echo "Extracted SOURCE_BRANCH_$section_name: '$extracted_branch'"
-            if [[ -n "$extracted_branch" && "$EXTRACTED_KEYWORDS" =~ \b$section_name\b ]]; then
+            if [[ -n "$extracted_branch" ]]; then
               echo "SOURCE_BRANCH_$section_name=$extracted_branch" >> $GITHUB_ENV
             fi
           }
