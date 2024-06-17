@@ -241,7 +241,7 @@ jobs:
           git checkout -b $BRANCH_NAME
           
           # Define YAML files to process
-          YAML_FILES=("test.yaml" "test1.yaml")
+          YAML_FILES=("qa/test.yaml" "qa/test1.yaml")
           
           for FILE in "${YAML_FILES[@]}"; do
             echo "Processing $FILE"
