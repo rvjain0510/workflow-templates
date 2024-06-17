@@ -275,46 +275,42 @@ jobs:
           git push origin ${{env.NEW_TAG_NOTIFICATION}}      
           
       - name: Update tags in YAML files
-        if: env.NEW_TAG_BFF || env.NEW_TAG_KYC || env.NEW_TAG_AX360 || env.NEW_TAG_NOTIFICATION
+        if: env.NEW_TAG_KYC || env.NEW_TAG_NOTIFICATION || env.NEW_TAG_BFF || env.NEW_TAG_AX360
         run: |
           cd trepo
           git checkout main
           git pull origin main
           
-          # Create a new branch based on today's date
-          BRANCH_NAME="au/$(date +'%Y-%m-%d')_${{ github.event.issue.number }}"
+          # Create a new branch based on today's date and issue number
+          BRANCH_NAME="qa/$(date +'%Y-%m-%d')_${{ github.event.issue.number }}"
           git checkout -b $BRANCH_NAME
           
           # Define YAML files to process
-          YAML_FILES=("au/test.yaml" "au/test1.yaml")
+          YAML_FILES=("qa/test.yaml" "qa/test1.yaml")
           
           for FILE in "${YAML_FILES[@]}"; do
             echo "Processing $FILE"
             
             # Update tags in each YAML file based on new tags created
             if [ "${{ env.NEW_TAG_BFF }}" ]; then
-              echo "Replacing tag in $FILE with: ${{ env.NEW_TAG_BFF }}"
-              sed -i "s/^.*tag: ax360-bff-v[0-9]\+\.[0-9]\+\.[0-9]+\.[0-9]\+/  tag: ${{ env.NEW_TAG_BFF }}/g" "$FILE"
+              sed -i "s/^.*tag: ax360-bff-v[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+/  tag: ${{ env.NEW_TAG_BFF }}/g" "$FILE"
             fi
             
             if [ "${{ env.NEW_TAG_AX360 }}" ]; then
-              echo "Replacing tag in $FILE with: ${{ env.NEW_TAG_AX360 }}"
-              sed -i "s/^.*tag: ax360-webapp-v[0-9]\+\.[0-9]\+\.[0-9]+\.[0-9]\+/  tag: ${{ env.NEW_TAG_AX360 }}/g" "$FILE"
+              sed -i "s/^.*tag: ax360-webapp-v[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+/  tag: ${{ env.NEW_TAG_AX360 }}/g" "$FILE"
             fi
             
             if [ "${{ env.NEW_TAG_KYC }}" ]; then
-              echo "Replacing tag in $FILE with: ${{ env.NEW_TAG_KYC }}"
-              sed -i "s/^.*tag: iapw-kyc-v[0-9]\+\.[0-9]\+\.[0-9]+\.[0-9]\+/  tag: ${{ env.NEW_TAG_KYC }}/g" "$FILE"
+              sed -i "s/^.*tag: iapw-kyc-v[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+/  tag: ${{ env.NEW_TAG_KYC }}/g" "$FILE"
             fi
             
             if [ "${{ env.NEW_TAG_NOTIFICATION }}" ]; then
-              echo "Replacing tag in $FILE with: ${{ env.NEW_TAG_NOTIFICATION }}"
-              sed -i "s/^.*tag: iapw-notification-v[0-9]\+\.[0-9]\+\.[0-9]+\.[0-9]\+/  tag: ${{ env.NEW_TAG_NOTIFICATION }}/g" "$FILE"
+              sed -i "s/^.*tag: iapw-notification-v[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+/  tag: ${{ env.NEW_TAG_NOTIFICATION }}/g" "$FILE"
             fi
           done
           
           # Commit the changes
-          git commit -am "Update tags for ${{ env.KEYWORDS }}"
+          git commit -am "Update tags for issue ${{ github.event.issue.number }}"
           
           # Push the changes to the remote branch
           git push origin $BRANCH_NAME
