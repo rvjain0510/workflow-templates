@@ -45,31 +45,30 @@ jobs:
             fi
           }
 
-          # Check and extract source branches only if section name is in EXTRACTED_KEYWORDS
-
-          # Extracting Source Branch for KYC
-          if [[ "$EXTRACTED_KEYWORDS" =~ \bKYC\b ]]; then
-            SOURCE_BRANCH_KYC=$(echo "$ISSUE_BODY" | awk '/### Source Branch for KYC/{flag=1;next}/###/{flag=0}flag')
-            extract_source_branch "$SOURCE_BRANCH_KYC" "KYC"
-          fi
-
-          # Extracting Source Branch for Notification
-          if [[ "$EXTRACTED_KEYWORDS" =~ \bNOTIFICATION\b ]]; then
-            SOURCE_BRANCH_NOTIFICATION=$(echo "$ISSUE_BODY" | awk '/### Source Branch for Notification/{flag=1;next}/###/{flag=0}flag')
-            extract_source_branch "$SOURCE_BRANCH_NOTIFICATION" "NOTIFICATION"
-          fi
-
-          # Extracting Source Branch for AX360
-          if [[ "$EXTRACTED_KEYWORDS" =~ \bAX360\b ]]; then
-            SOURCE_BRANCH_AX360=$(echo "$ISSUE_BODY" | awk '/### Source Branch for AX360/{flag=1;next}/###/{flag=0}flag')
-            extract_source_branch "$SOURCE_BRANCH_AX360" "AX360"
-          fi
-
-          # Extracting Source Branch for BFF
-          if [[ "$EXTRACTED_KEYWORDS" =~ \bBFF\b ]]; then
-            SOURCE_BRANCH_BFF=$(echo "$ISSUE_BODY" | awk '/### Source Branch for BFF/{flag=1;next}/###/{flag=0}flag')
-            extract_source_branch "$SOURCE_BRANCH_BFF" "BFF"
-          fi
+          # Loop over each keyword in EXTRACTED_KEYWORDS
+          for keyword in $EXTRACTED_KEYWORDS; do
+            case $keyword in
+              "KYC")
+                SOURCE_BRANCH_KYC=$(echo "$ISSUE_BODY" | awk '/### Source Branch for KYC/{flag=1;next}/###/{flag=0}flag')
+                extract_source_branch "$SOURCE_BRANCH_KYC" "KYC"
+                ;;
+              "NOTIFICATION")
+                SOURCE_BRANCH_NOTIFICATION=$(echo "$ISSUE_BODY" | awk '/### Source Branch for Notification/{flag=1;next}/###/{flag=0}flag')
+                extract_source_branch "$SOURCE_BRANCH_NOTIFICATION" "NOTIFICATION"
+                ;;
+              "AX360")
+                SOURCE_BRANCH_AX360=$(echo "$ISSUE_BODY" | awk '/### Source Branch for AX360/{flag=1;next}/###/{flag=0}flag')
+                extract_source_branch "$SOURCE_BRANCH_AX360" "AX360"
+                ;;
+              "BFF")
+                SOURCE_BRANCH_BFF=$(echo "$ISSUE_BODY" | awk '/### Source Branch for BFF/{flag=1;next}/###/{flag=0}flag')
+                extract_source_branch "$SOURCE_BRANCH_BFF" "BFF"
+                ;;
+              *)
+                echo "Unknown keyword: $keyword"
+                ;;
+            esac
+          done
 
           echo "Extracted PR_DESCRIPTION: $PR_DESCRIPTION"
           echo "Extracted EXTRACTED_KEYWORDS: $EXTRACTED_KEYWORDS"
@@ -80,7 +79,6 @@ jobs:
             echo "KEYWORDS=$EXTRACTED_KEYWORDS" >> $GITHUB_ENV
             echo "PR_KEYWORDS=$PR_KEYWORDS" >> $GITHUB_ENV
           fi
-
       - name: Print extracted variables
         run: |
           echo "Print all assigned variables:"
