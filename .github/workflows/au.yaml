@@ -310,7 +310,7 @@ jobs:
           done
           
           # Commit the changes
-          git commit -am "Update tags for issue ${{ github.event.issue.number }}"
+          git commit -am "Update tags for issue ${{ env.keywords }}"
           
           # Push the changes to the remote branch
           git push origin $BRANCH_NAME
