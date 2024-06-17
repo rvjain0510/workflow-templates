@@ -14,26 +14,14 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v2
 
-      - name: Extract issue information
+- name: Extract issue information
         id: extract
         run: |
           ISSUE_BODY="${{ github.event.issue.body }}"
           echo "ISSUE_BODY content:"
           echo "$ISSUE_BODY"
-
           # Convert issue body to JSON format
           ISSUE_JSON=$(echo "$ISSUE_BODY" | jq -R -s 'split("\n") | map(select(. != ""))')
-
-          ISSUE_BODY="${{ github.event.issue.body }}"
-          echo "ISSUE_BODY content:"
-          echo "$ISSUE_BODY"
-
-          # Convert issue body to JSON format
-          ISSUE_JSON=$(echo "$ISSUE_BODY" | jq -R -s 'split("\n") | map(select(. != ""))')
-
-          # Extracting pull request description (includes spaces and lines)
-          PR_DESCRIPTION=$(echo "$ISSUE_BODY" | awk '/### Pull Request Description/{flag=1;next}/###/{flag=0}flag' | sed 's/^ *//;s/ *$//')
-
           # Extracting selected repository keywords
           EXTRACTED_KEYWORDS=$(echo "$ISSUE_BODY" | awk '/### Which repository you want to push/{flag=1;next}/###/{flag=0}flag' | grep -oP '(?<=\[X\] ).*')
           EXTRACTED_KEYWORDS=$(echo $EXTRACTED_KEYWORDS | xargs)
@@ -50,7 +38,9 @@ jobs:
             fi
             
             echo "Extracted SOURCE_BRANCH_$section_name: '$extracted_branch'"
-            echo "SOURCE_BRANCH_$section_name=$extracted_branch" >> $GITHUB_ENV
+            if [[ -n "$extracted_branch" ]]; then
+              echo "SOURCE_BRANCH_$section_name=$extracted_branch" >> $GITHUB_ENV
+            fi
           }
 
           # Extracting Source Branch for KYC
@@ -73,15 +63,16 @@ jobs:
           echo "Extracted EXTRACTED_KEYWORDS: $EXTRACTED_KEYWORDS"
 
           # Set PR_DESCRIPTION and EXTRACTED_KEYWORDS as environment variables
-          echo "$PR_DESCRIPTION" > $GITHUB_WORKSPACE/pr_description.json
-          echo "KEYWORDS=$EXTRACTED_KEYWORDS" >> $GITHUB_ENV
-          echo "PR_KEYWORDS=$PR_KEYWORDS" >> $GITHUB_ENV
-
+          if [[ -n "$EXTRACTED_KEYWORDS" ]]; then
+            echo "$PR_DESCRIPTION" > $GITHUB_WORKSPACE/pr_description.json
+            echo "KEYWORDS=$EXTRACTED_KEYWORDS" >> $GITHUB_ENV
+            echo "PR_KEYWORDS=$PR_KEYWORDS" >> $GITHUB_ENV
+          fi
 
       - name: Print extracted variables
         run: |
-          echo "${{env.KEYWORDS}}"
-          echo "${{env.PR_KEYWORDS}}"
+          echo "Print all assigned variables:"
+          env | sort
           
       - name: Set up Git
         run: |
