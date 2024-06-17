@@ -19,7 +19,18 @@ body:
         - label: BFF
     validations:
       required: true
- 
+  - type: input
+    id: source-branch-kyc
+    attributes:
+      label: Source Branch for kyc
+      description: "The branch to create the release branch from (e.g., `main` or `develop`)."
+      placeholder: "main"
+ - type: input
+    id: source-branch-notification
+    attributes:
+      label: Source Branch for notification
+      description: "The branch to create the release branch from (e.g., `main` or `develop`)."
+      placeholder: "main"      
   - type: textarea
     id: pr-description
     attributes:
