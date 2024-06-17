@@ -3,7 +3,7 @@ description: Use this template to push your code to QA environment
 title: "[QA] Deployment of latest code to QA - "
 labels:
   - release
-  - workflow
+  - qa
 assignees:
   - your-username
 body:
