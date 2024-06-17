@@ -293,18 +293,22 @@ jobs:
             
             # Update tags in each YAML file based on new tags created
             if [ "${{ env.NEW_TAG_BFF }}" ]; then
+              echo "Replacing tag in $FILE with: ${{ env.NEW_TAG_BFF }}"
               sed -i "s/^.*tag: ax360-bff-v[0-9]\+\.[0-9]\+\.[0-9]+\.[0-9]\+/  tag: ${{ env.NEW_TAG_BFF }}/g" "$FILE"
             fi
             
             if [ "${{ env.NEW_TAG_AX360 }}" ]; then
+              echo "Replacing tag in $FILE with: ${{ env.NEW_TAG_AX360 }}"
               sed -i "s/^.*tag: ax360-webapp-v[0-9]\+\.[0-9]\+\.[0-9]+\.[0-9]\+/  tag: ${{ env.NEW_TAG_AX360 }}/g" "$FILE"
             fi
             
             if [ "${{ env.NEW_TAG_KYC }}" ]; then
+              echo "Replacing tag in $FILE with: ${{ env.NEW_TAG_KYC }}"
               sed -i "s/^.*tag: iapw-kyc-v[0-9]\+\.[0-9]\+\.[0-9]+\.[0-9]\+/  tag: ${{ env.NEW_TAG_KYC }}/g" "$FILE"
             fi
             
             if [ "${{ env.NEW_TAG_NOTIFICATION }}" ]; then
+              echo "Replacing tag in $FILE with: ${{ env.NEW_TAG_NOTIFICATION }}"
               sed -i "s/^.*tag: iapw-notification-v[0-9]\+\.[0-9]\+\.[0-9]+\.[0-9]\+/  tag: ${{ env.NEW_TAG_NOTIFICATION }}/g" "$FILE"
             fi
           done
@@ -314,6 +318,7 @@ jobs:
           
           # Push the changes to the remote branch
           git push origin $BRANCH_NAME
+
 
       - name: Create Pull Request
         if: env.NEW_TAG_KYC || env.NEW_TAG_NOTIFICATION || env.NEW_TAG_BFF
