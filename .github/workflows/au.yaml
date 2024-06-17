@@ -160,7 +160,7 @@ jobs:
           cd trepo
       
           # Define the YAML files you want to process
-          YAML_FILES=("test.yaml" "test1.yaml") # Add more files as needed
+          YAML_FILES=("au/test.yaml" "au/test1.yaml") # Add more files as needed
       
           # Define the shorthand mappings
           declare -A SHORTHAND_MAP=(
