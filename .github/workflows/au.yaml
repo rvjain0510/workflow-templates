@@ -301,26 +301,26 @@ jobs:
           git checkout -b $BRANCH_NAME
           
           # Define YAML files to process
-          YAML_FILES=("test.yaml" "test1.yaml")
+          YAML_FILES=("au/test.yaml" "au/test1.yaml")
           
           for FILE in "${YAML_FILES[@]}"; do
             echo "Processing $FILE"
             
             # Update tags in each YAML file based on new tags created
             if [ "${{ env.NEW_TAG_BFF }}" ]; then
-              sed -i "s/^.*tag: ax360-bff-v[0-9]\+\.[0-9]\+\.[0-9]\+/  tag: ${{ env.NEW_TAG_BFF }}/g" "$FILE"
+              sed -i "s/^.*tag: ax360-bff-v[0-9]\+\.[0-9]\+\.[0-9]+\.[0-9]\+/  tag: ${{ env.NEW_TAG_BFF }}/g" "$FILE"
             fi
             
             if [ "${{ env.NEW_TAG_AX360 }}" ]; then
-              sed -i "s/^.*tag: ax360-webapp-v[0-9]\+\.[0-9]\+\.[0-9]\+/  tag: ${{ env.NEW_TAG_AX360 }}/g" "$FILE"
+              sed -i "s/^.*tag: ax360-webapp-v[0-9]\+\.[0-9]\+\.[0-9]+\.[0-9]\+/  tag: ${{ env.NEW_TAG_AX360 }}/g" "$FILE"
             fi
             
             if [ "${{ env.NEW_TAG_KYC }}" ]; then
-              sed -i "s/^.*tag: iapw-kyc-v[0-9]\+\.[0-9]\+\.[0-9]\+/  tag: ${{ env.NEW_TAG_KYC }}/g" "$FILE"
+              sed -i "s/^.*tag: iapw-kyc-v[0-9]\+\.[0-9]\+\.[0-9]+\.[0-9]\+/  tag: ${{ env.NEW_TAG_KYC }}/g" "$FILE"
             fi
             
             if [ "${{ env.NEW_TAG_NOTIFICATION }}" ]; then
-              sed -i "s/^.*tag: iapw-notification-v[0-9]\+\.[0-9]\+\.[0-9]\+/  tag: ${{ env.NEW_TAG_NOTIFICATION }}/g" "$FILE"
+              sed -i "s/^.*tag: iapw-notification-v[0-9]\+\.[0-9]\+\.[0-9]+\.[0-9]\+/  tag: ${{ env.NEW_TAG_NOTIFICATION }}/g" "$FILE"
             fi
           done
           
