@@ -282,11 +282,11 @@ jobs:
           git pull origin main
           
           # Create a new branch based on today's date and issue number
-          BRANCH_NAME="qa/$(date +'%Y-%m-%d')_${{ github.event.issue.number }}"
+          BRANCH_NAME="au/$(date +'%Y-%m-%d')_${{ github.event.issue.number }}"
           git checkout -b $BRANCH_NAME
           
           # Define YAML files to process
-          YAML_FILES=("qa/test.yaml" "qa/test1.yaml")
+          YAML_FILES=("au/test.yaml" "au/test1.yaml")
           
           for FILE in "${YAML_FILES[@]}"; do
             echo "Processing $FILE"
