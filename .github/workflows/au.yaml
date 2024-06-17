@@ -198,22 +198,11 @@ jobs:
                       break
                     fi
                   done
-      
                   # Check if the shorthand is in the target list
                   if [[ " $TARGET_SHORTHANDS " =~ " $SHORTHAND " ]]; then
                     echo "Tag $TAG (shorthand $SHORTHAND) is in the target list."
       
-                    if [[ "$NAME" == "ax360-"* ]]; then
-                      # Increment the version for ax360 tags
-                      IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
-                      MAJOR=${VERSION_PARTS[0]}
-                      MINOR=${VERSION_PARTS[1]}
-                      PATCH=${VERSION_PARTS[2]}
-      
-                      # Increment the patch version
-                      NEW_PATCH=$((PATCH + 1))
-                      NEW_TAG="$NAME$MAJOR.$MINOR.$NEW_PATCH"
-                    else
+                    
                       # Increment the build version for iapw tags
                       IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
                       MAJOR=${VERSION_PARTS[0]}
@@ -224,7 +213,7 @@ jobs:
                       # Increment the build version
                       NEW_BUILD=$((BUILD + 1))
                       NEW_TAG="$NAME-$MAJOR.$MINOR.$PATCH.$NEW_BUILD"
-                    fi
+               
                     echo "New tag: $NEW_TAG"
       
                     # Set environment variable for the new tag
