@@ -1,4 +1,4 @@
-name: Create Release 
+name: Create AU Release 
 description: Use this template to push your code to AU environment
 title: "[AU] Deployment of latest code to AU - "
 labels:
