@@ -229,13 +229,13 @@ jobs:
           done
 
       - name: Create release branch for BFF
-        if: env.NEW_TAG_BFF
+        if: env.SOURCE_BRANCH_BFF
         run: |
           # Clone the source repository
           git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow test-workflow
           cd test-workflow
           # Checkout the source branch
-          git checkout main
+          git checkout ${{env.SOURCE_BRANCH_BFF}}
           # Create and checkout the new release branch
           git checkout -b release/${{env.NEW_TAG_BFF}}
           # Push the new branch to origin
@@ -244,13 +244,13 @@ jobs:
           git push origin ${{env.NEW_TAG_BFF}}
 
       - name: Create release branch for KYC
-        if: env.NEW_TAG_KYC
+        if: env.SOURCE_BRANCH_KYC
         run: |
           # Clone the source repository
           git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/KYC KYC
           cd KYC
           # Checkout the source branch
-          git checkout main
+          git checkout ${{env.SOURCE_BRANCH_KYC}}
           # Create and checkout the new release branch
           git checkout -b release/${{env.NEW_TAG_KYC}}
           # Push the new branch to origin
@@ -259,13 +259,13 @@ jobs:
           git push origin ${{env.NEW_TAG_KYC}}  
           
       - name: Create release branch for NOTIFICATION
-        if: env.NEW_TAG_NOTIFICATION
+        if: env.SOURCE_BRANCH_NOTIFICATION
         run: |
           # Clone the source repository
           git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/NOTIFICATION NOTIFICATION
           cd NOTIFICATION
           # Checkout the source branch
-          git checkout main
+          git checkout ${{env.SOURCE_BRANCH_NOTIFICATION}}
           # Create and checkout the new release branch
           git checkout -b release/${{env.NEW_TAG_NOTIFICATION}}
           # Push the new branch to origin
@@ -274,7 +274,7 @@ jobs:
           git push origin ${{env.NEW_TAG_NOTIFICATION}}      
           
       - name: Update tags in YAML files
-        if: env.NEW_TAG_KYC || env.NEW_TAG_NOTIFICATION || env.NEW_TAG_BFF
+        if: env.SOURCE_BRANCH_NOTIFICATION || env.SOURCE_BRANCH_KYC || env.SOURCE_BRANCH_BFF
         run: |
           cd trepo
           git checkout main
