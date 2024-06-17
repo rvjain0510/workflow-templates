@@ -1,7 +1,7 @@
 name: Create QA Release 
 description: Use this template to push your code to QA environment
 title: "[QA] Deployment of latest code to QA - "
-labels: [qa, needs-triage]
+labels: [qa]
 assignees:
   - your-username
 body:
