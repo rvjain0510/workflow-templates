@@ -1,0 +1,35 @@
+body:
+  - type: checkboxes
+    id: repositories
+    attributes:
+      label: Which repositories you want to push to?
+      options:
+        - label: KYC
+        - label: HOUSEHOLD
+        - label: DATA
+        - label: NOTIFICATION
+        - label: AX360
+        - label: BFF
+    validations:
+      required: true
+
+  # Define dynamic sections using conditional visibility with aliases
+  - type: textarea
+    id: branch_name_kyc
+    attributes:
+      label: Branch Name for KYC
+      description: Enter the branch name for KYC repository
+      placeholder: e.g., main
+    conditional_visibility:
+      condition: repositories[0].checked  # Using the first checkbox for KYC as an example
+
+  - type: textarea
+    id: branch_name_household
+    attributes:
+      label: Branch Name for HOUSEHOLD
+      description: Enter the branch name for HOUSEHOLD repository
+      placeholder: e.g., develop
+    conditional_visibility:
+      condition: repositories[1].checked  # Using the second checkbox for HOUSEHOLD as an example
+
+# Repeat similar sections for other repositories
