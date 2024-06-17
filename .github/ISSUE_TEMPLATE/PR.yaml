@@ -1,0 +1,51 @@
+name: Create Release 
+description: Use this template to create a release branch from a different repository.
+title: "[Release Branch Request] - "
+labels:
+  - release
+  - workflow
+assignees:
+  - your-username
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Create Release Branch
+        
+        Please provide the following details to create a release branch.
+  - type: input
+    id: source-repository
+    attributes:
+      label: Source Repository
+      description: "The repository from which to create the release branch (e.g., `organization/repo-name`)."
+      placeholder: "organization/repo-name"
+  - type: input
+    id: source-branch
+    attributes:
+      label: Source Branch
+      description: "The branch to create the release branch from (e.g., `main` or `develop`)."
+      placeholder: "main"
+  - type: input
+    id: pr-title
+    attributes:
+      label: Pull Request Title
+      description: "The title of the pull request to be created."
+      placeholder: "Release v1.0.0"
+  - type: textarea
+    id: pr-description
+    attributes:
+      label: Pull Request Description
+      description: "A detailed description of the pull request."
+      placeholder: "This pull request includes the following changes..."
+  - type: checkboxes
+    id: checkboxes
+    attributes:
+      label: What kinds of M&Ms do you like?
+      description: You may select more than one.
+      options:
+        - label: Green
+        - label: Orange
+        - label: Red
+        - label: Yellow
+    validations:
+      required: false

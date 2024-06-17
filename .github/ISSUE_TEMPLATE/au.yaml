@@ -1,0 +1,32 @@
+name: Create Release 
+description: Use this template to push your code to AU environment
+title: "[AU] Deployment of latest code to AU - "
+labels:
+  - release
+  - au
+assignees:
+  - your-username
+body:
+  - type: checkboxes
+    id: checkboxes
+    attributes:
+      label: Which repository you want to push
+      description: You may select more than one.
+      options:
+        - label: KYC
+        - label: HOUSEHOLD
+        - label: DATA
+        - label: NOTIFICATION
+        - label: AX360
+        - label: BFF
+    validations:
+      required: true
+ 
+  - type: textarea
+    id: pr-description
+    attributes:
+      label: Pull Request Description
+      description: "A detailed description of the pull request."
+      placeholder: "This pull request includes the following changes..."
+    validations:
+      required: true
