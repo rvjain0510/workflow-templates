@@ -317,7 +317,7 @@ jobs:
 
 
       - name: Create Pull Request
-        if: env.NEW_TAG_KYC || env.NEW_TAG_NOTIFICATION || env.NEW_TAG_BFF
+        if: env.SOURCE_BRANCH_NOTIFICATION || env.SOURCE_BRANCH_KYC || env.SOURCE_BRANCH_BFF || env.NEW_TAG_AX360
         id: create_pr
         run: |
          cd trepo
@@ -329,7 +329,7 @@ jobs:
 
 
       - name: Comment on Issue with PR Link
-        if: env.NEW_TAG_KYC || env.NEW_TAG_NOTIFICATION || env.NEW_TAG_BFF
+        if: env.SOURCE_BRANCH_NOTIFICATION || env.SOURCE_BRANCH_KYC || env.SOURCE_BRANCH_BFF || env.NEW_TAG_AX360
         run: |
           ISSUE_NUMBER=${{ github.event.issue.number }}
           PR_URL=${{ env.PR_URL }}
