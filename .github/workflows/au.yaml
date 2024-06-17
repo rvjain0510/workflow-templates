@@ -176,7 +176,7 @@ jobs:
           for FILE in "${YAML_FILES[@]}"; do
             echo "Processing $FILE"
             # Extract tags from the YAML file
-            TAGS=$(grep -oP 'tag:\s*\K((ax360-[a-z]+-v\d+\.\d+\.\d+)|(iapw-[a-z]+-v\d+\.\d+\.\d+\.\d+))' "$FILE")
+            TAGS=$(grep -oP 'tag:\s*\K((ax360-[a-z]+-v\d+\.\d+\.\d+\.\d+)|(iapw-[a-z]+-v\d+\.\d+\.\d+\.\d+))' "$FILE")
       
             if [ -n "$TAGS" ]; then
               while IFS= read -r TAG; do
