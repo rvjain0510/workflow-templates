@@ -4,12 +4,10 @@ name: QA DEPLOYMENT
 on:
   issues:
     types: [opened]
-    tags:
-      - qa
-
 
 jobs:
   create-release-branch:
+    if: contains(github.event.issue.labels.*.name, 'qa')
     runs-on: ubuntu-latest
 
     steps:
