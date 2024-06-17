@@ -1,4 +1,4 @@
-name: Create Release 
+name: Create PR Release 
 description: Use this template to create a release branch from a different repository.
 title: "[Release Branch Request] - "
 labels:
