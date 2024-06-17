@@ -29,38 +29,40 @@ jobs:
 
           # Extracting selected repository keywords
           EXTRACTED_KEYWORDS=$(echo "$ISSUE_BODY" | awk '/### Which repository you want to push/{flag=1;next}/###/{flag=0}flag' | grep -oP '(?<=\[X\] ).*')
-
-          # Trim any leading/trailing whitespace
           EXTRACTED_KEYWORDS=$(echo $EXTRACTED_KEYWORDS | xargs)
           PR_KEYWORDS=$(echo $EXTRACTED_KEYWORDS | sed 's/\([^ ]*\)/[\1] /g')
 
-          # Extract Source Branch for KYC
+          # Extracting Source Branch for KYC
           SOURCE_BRANCH_KYC=$(echo "$ISSUE_BODY" | awk '/### Source Branch for KYC/{flag=1;next}/###/{flag=0}flag' | sed 's/^ *//;s/ *$//')
+          if [[ "$SOURCE_BRANCH_KYC" == *"_No response_"* ]]; then
+            SOURCE_BRANCH_KYC=""
+          fi
 
-          # Extract Source Branch for Notification
+          # Extracting Source Branch for Notification
           SOURCE_BRANCH_NOTIFICATION=$(echo "$ISSUE_BODY" | awk '/### Source Branch for Notification/{flag=1;next}/###/{flag=0}flag' | sed 's/^ *//;s/ *$//')
+          if [[ "$SOURCE_BRANCH_NOTIFICATION" == *"_No response_"* ]]; then
+            SOURCE_BRANCH_NOTIFICATION=""
+          fi
 
-          # Output extracted values
           echo "Extracted PR_DESCRIPTION: $PR_DESCRIPTION"
           echo "Extracted EXTRACTED_KEYWORDS: $EXTRACTED_KEYWORDS"
           echo "Extracted SOURCE_BRANCH_KYC: $SOURCE_BRANCH_KYC"
           echo "Extracted SOURCE_BRANCH_NOTIFICATION: $SOURCE_BRANCH_NOTIFICATION"
 
           # Set environment variables
-          # Save the PR_DESCRIPTION to a file for multiline handling
           echo "$PR_DESCRIPTION" > $GITHUB_WORKSPACE/pr_description.json
+          echo "KEYWORDS=$EXTRACTED_KEYWORDS" >> $GITHUB_ENV
+          echo "PR_KEYWORDS=$PR_KEYWORDS" >> $GITHUB_ENV
 
-          # Save extracted source branches to a file if they are not empty
+          # Set SOURCE_BRANCH_KYC if not empty
           if [ -n "$SOURCE_BRANCH_KYC" ]; then
             echo "SOURCE_BRANCH_KYC=$SOURCE_BRANCH_KYC" >> $GITHUB_ENV
           fi
 
+          # Set SOURCE_BRANCH_NOTIFICATION if not empty
           if [ -n "$SOURCE_BRANCH_NOTIFICATION" ]; then
             echo "SOURCE_BRANCH_NOTIFICATION=$SOURCE_BRANCH_NOTIFICATION" >> $GITHUB_ENV
           fi
-
-          echo "KEYWORDS=$EXTRACTED_KEYWORDS" >> $GITHUB_ENV
-          echo "PR_KEYWORDS=$PR_KEYWORDS" >> $GITHUB_ENV
 
       - name: Print extracted variables
         run: |
