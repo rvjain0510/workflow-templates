@@ -1,0 +1,292 @@
+name: QA DEPLOYMENT
+
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  create-release-branch:
+    if: contains(github.event.issue.labels.*.name, 'au')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Extract issue information
+        id: extract
+        run: |
+          ISSUE_BODY="${{ github.event.issue.body }}"
+          echo "ISSUE_BODY content:"
+          echo "$ISSUE_BODY"
+          # Convert issue body to JSON format
+          ISSUE_JSON=$(echo "$ISSUE_BODY" | jq -R -s 'split("\n") | map(select(. != ""))')
+          # Extracting pull request description (includes spaces and lines)
+          PR_DESCRIPTION=$(echo "$ISSUE_BODY" | awk '/### Pull Request Description/{flag=1;next}/###/{flag=0}flag' | sed 's/^ *//;s/ *$//')
+          EXTRACTED_KEYWORDS=$(echo "$ISSUE_BODY" | awk '/### Which repository you want to push/{flag=1;next}/###/{flag=0}flag' | grep -oP '(?<=\[X\] ).*')
+          # Trim any leading/trailing whitespace
+          EXTRACTED_KEYWORDS=$(echo $EXTRACTED_KEYWORDS | xargs)
+          PR_KEYWORDS=$(echo $EXTRACTED_KEYWORDS | sed 's/\([^ ]*\)/[\1] /g')
+          echo "Extracted PR_DESCRIPTION: $PR_DESCRIPTION"
+          echo "Extracted EXTRACTED_KEYWORDS: $EXTRACTED_KEYWORDS"
+          # Set environment variables
+          # Save the PR_DESCRIPTION to a file for multiline handling
+          echo "$PR_DESCRIPTION" > $GITHUB_WORKSPACE/pr_description.json
+          echo "KEYWORDS=$EXTRACTED_KEYWORDS" >> $GITHUB_ENV
+          echo "PR_KEYWORDS=$PR_KEYWORDS" >> $GITHUB_ENV
+      - name: Print extracted variables
+        run: |
+          echo "${{env.KEYWORDS}}"
+          echo "${{env.PR_KEYWORDS}}"
+          
+      - name: Set up Git
+        run: |
+          git config --global credential.helper store
+          git config --global user.email "jainrv0510@gmail.com"
+          git config --global user.name "rvjain0510"
+          
+      - name: Get list of open pull requests
+        run: |
+          # Fetch open pull requests from GitHub API
+          curl -sSf -H "Authorization: token ${{ secrets.TESTY }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               https://api.github.com/repos/rvjain0510/test-workflow-dep/pulls?state=open \
+               -o pulls.json      
+      - name: Check PR titles for keywords
+        run: |
+          # Read keywords from the environment variable
+          IFS=' ' read -r -a keywords <<< "${{ env.KEYWORDS }}"
+          
+          # Loop through each pull request and check for keywords
+          jq -c '.[]' pulls.json | while read i; do
+            pr_number=$(echo "$i" | jq -r '.number')
+            pr_title=$(echo "$i" | jq -r '.title')
+            
+            # Check if [QA] is present in the PR title
+            if echo "$pr_title" | grep -q "\[QA\]"; then
+              # Perform keyword check for each PR title
+              for keyword in "${keywords[@]}"; do
+                if echo "$pr_title" | grep -q "$keyword"; then
+                  echo "PR #$pr_number titled '$pr_title' contains the keyword '$keyword'."
+                  
+                  # Assuming you want to take an action like commenting on an issue
+                  ISSUE_NUMBER=${{ github.event.issue.number }}
+                  COMMENT_BODY="There is already a PR open for your service requested"
+                  gh issue comment $ISSUE_NUMBER --body "$COMMENT_BODY"
+                  
+                  exit 1  # Exit with a non-zero status to indicate found keywords
+                fi
+              done
+              
+              # Echo PR details (for illustration)
+              echo "PR #$pr_number: $pr_title"
+            else
+              echo "PR #$pr_number titled '$pr_title' does not contain [QA]. Skipping keyword check."
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ secrets.TESTY }}
+      # - name: Get list of open pull requests
+      #   run: |
+      #     curl -H "Authorization: token ${{ secrets.TESTY }}" \
+      #          -H "Accept: application/vnd.github.v3+json" \
+      #          https://api.github.com/repos/rvjain0510/test-workflow-dep/pulls?state=open \
+      #          -o pulls.json
+          
+      #     # Loop through each pull request and get detailed information
+      #     jq -c '.[]' pulls.json | while read i; do
+      #       pr_number=$(echo $i | jq '.number')
+      #       pr_title=$(echo $i | jq '.title')
+      #       pr_body=$(curl -H "Authorization: token ${{ secrets.TESTY }}" \
+      #                       -H "Accept: application/vnd.github.v3+json" \
+      #                       https://api.github.com/repos/rvjain0510/test-workflow-dep/pulls/$pr_number | jq '.body')
+      #       pr_comments=$(curl -H "Authorization: token ${{ secrets.TESTY }}" \
+      #                         -H "Accept: application/vnd.github.v3+json" \
+      #                         https://api.github.com/repos/rvjain0510/test-workflow-dep/issues/$pr_number/comments | jq -c '.[] | {user: .user.login, comment: .body}')
+            
+      #       echo "PR #$pr_number: $pr_title"
+      #       echo "Body: $pr_body"
+      #       echo "Comments: $pr_comments"
+      #     done
+      - name: Create tags
+        run: |
+          # Clone the source repository
+          git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow-dep trepo
+          cd trepo
+      
+          # Define the YAML files you want to process
+          YAML_FILES=("test.yaml" "test1.yaml") # Add more files as needed
+      
+          # Define the shorthand mappings
+          declare -A SHORTHAND_MAP=(
+            ["BFF"]="ax360-bff"
+            ["AX360"]="ax360-webapp"
+            ["KYC"]="iapw-kyc"
+            ["NOTIFICATION"]="iapw-notification"
+          )
+      
+          # Define the shorthands you are interested in, separated by spaces
+          TARGET_SHORTHANDS="${{ env.KEYWORDS }}"
+      
+          for FILE in "${YAML_FILES[@]}"; do
+            echo "Processing $FILE"
+            # Extract tags from the YAML file
+              TAGS=$(grep -oP 'tag:\s*\K((ax360-[a-z]+-v\d+\.\d+\.\d+)|(iapw-[a-z]+-v\d+\.\d+\.\d+))' "$FILE")            
+                if [ -n "$TAGS" ]; then
+                while IFS= read -r TAG; do
+                  echo "Extracted tag: $TAG"
+            
+                  # Extract NAME and VERSION from the tag
+                  NAME=$(echo "$TAG" | cut -d'-' -f1-2)
+                  VERSION=$(echo "$TAG" | cut -d'-' -f3-)
+            
+                  echo "NAME: $NAME"
+                  echo "VERSION: $VERSION"
+
+                if [[ " ${SHORTHAND_MAP[@]} " =~ " $NAME " ]]; then
+                  # Get the corresponding shorthand for the name
+                  SHORTHAND=""
+                  for key in "${!SHORTHAND_MAP[@]}"; do
+                    if [[ "${SHORTHAND_MAP[$key]}" == "$NAME" ]]; then
+                      SHORTHAND=$key
+                      break
+                    fi
+                  done
+      
+                  # Check if the shorthand is in the target list
+                  if [[ " $TARGET_SHORTHANDS " =~ " $SHORTHAND " ]]; then
+                    echo "Tag $TAG (shorthand $SHORTHAND) is in the target list."
+      
+                    IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
+                    MAJOR=${VERSION_PARTS[0]}
+                    MINOR=${VERSION_PARTS[1]}
+                    PATCH=${VERSION_PARTS[2]}
+                    
+                    # Increment the patch version
+                    NEW_PATCH=$((PATCH + 1))
+                    NEW_TAG="$NAME-$MAJOR.$MINOR.$NEW_PATCH"
+                    echo "New tag: $NEW_TAG"
+                    
+                    # Set environment variables
+                    echo "NEW_TAG_$SHORTHAND=$NEW_TAG" >> $GITHUB_ENV
+                    echo "${{env.NEW_TAG_BFF}}"
+                    
+                  else
+                    echo "Tag $TAG (shorthand $SHORTHAND) is not in the target list."
+                  fi
+                else
+                  echo "Tag $TAG (name $NAME) does not match any shorthand in the map."
+                fi
+              done <<< "$TAGS"
+            else
+              echo "No tags found in $FILE"
+            fi
+          done
+
+      - name: Create release branch for BFF
+        if: env.NEW_TAG_BFF
+        run: |
+          # Clone the source repository
+          git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/test-workflow test-workflow
+          cd test-workflow
+          # Checkout the source branch
+          git checkout main
+          # Create and checkout the new release branch
+          git checkout -b release/${{env.NEW_TAG_BFF}}
+          # Push the new branch to origin
+          git push origin release/${{env.NEW_TAG_BFF}}
+          git tag ${{env.NEW_TAG_BFF}}
+          git push origin ${{env.NEW_TAG_BFF}}
+
+      - name: Create release branch for KYC
+        if: env.NEW_TAG_KYC
+        run: |
+          # Clone the source repository
+          git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/KYC KYC
+          cd KYC
+          # Checkout the source branch
+          git checkout main
+          # Create and checkout the new release branch
+          git checkout -b release/${{env.NEW_TAG_KYC}}
+          # Push the new branch to origin
+          git push origin release/${{env.NEW_TAG_KYC}}
+          git tag ${{env.NEW_TAG_KYC}}
+          git push origin ${{env.NEW_TAG_KYC}}  
+          
+      - name: Create release branch for NOTIFICATION
+        if: env.NEW_TAG_NOTIFICATION
+        run: |
+          # Clone the source repository
+          git clone https://${{ secrets.TESTY }}@github.com/rvjain0510/NOTIFICATION NOTIFICATION
+          cd NOTIFICATION
+          # Checkout the source branch
+          git checkout main
+          # Create and checkout the new release branch
+          git checkout -b release/${{env.NEW_TAG_NOTIFICATION}}
+          # Push the new branch to origin
+          git push origin release/${{env.NEW_TAG_NOTIFICATION}}
+          git tag ${{env.NEW_TAG_NOTIFICATION}}
+          git push origin ${{env.NEW_TAG_NOTIFICATION}}      
+          
+      - name: Update tags in YAML files
+        if: env.NEW_TAG_KYC || env.NEW_TAG_NOTIFICATION || env.NEW_TAG_BFF
+        run: |
+          cd trepo
+          git checkout main
+          git pull origin main
+          
+          # Create a new branch based on today's date
+          BRANCH_NAME="qa/$(date +'%Y-%m-%d')_${{ github.event.issue.number }}"
+          git checkout -b $BRANCH_NAME
+          
+          # Define YAML files to process
+          YAML_FILES=("test.yaml" "test1.yaml")
+          
+          for FILE in "${YAML_FILES[@]}"; do
+            echo "Processing $FILE"
+            
+            # Update tags in each YAML file based on new tags created
+            if [ "${{ env.NEW_TAG_BFF }}" ]; then
+              sed -i "s/^.*tag: ax360-bff-v[0-9]\+\.[0-9]\+\.[0-9]\+/  tag: ${{ env.NEW_TAG_BFF }}/g" "$FILE"
+            fi
+            
+            if [ "${{ env.NEW_TAG_AX360 }}" ]; then
+              sed -i "s/^.*tag: ax360-webapp-v[0-9]\+\.[0-9]\+\.[0-9]\+/  tag: ${{ env.NEW_TAG_AX360 }}/g" "$FILE"
+            fi
+            
+            if [ "${{ env.NEW_TAG_KYC }}" ]; then
+              sed -i "s/^.*tag: iapw-kyc-v[0-9]\+\.[0-9]\+\.[0-9]\+/  tag: ${{ env.NEW_TAG_KYC }}/g" "$FILE"
+            fi
+            
+            if [ "${{ env.NEW_TAG_NOTIFICATION }}" ]; then
+              sed -i "s/^.*tag: iapw-notification-v[0-9]\+\.[0-9]\+\.[0-9]\+/  tag: ${{ env.NEW_TAG_NOTIFICATION }}/g" "$FILE"
+            fi
+          done
+          
+          # Commit the changes
+          git commit -am "Update tags for ${{ env.KEYWORDS }}"
+          
+          # Push the changes to the remote branch
+          git push origin $BRANCH_NAME
+      - name: Create Pull Request
+        if: env.NEW_TAG_KYC || env.NEW_TAG_NOTIFICATION || env.NEW_TAG_BFF
+        id: create_pr
+        run: |
+         cd trepo
+         gh pr create --base main --head qa/$(date +"%Y-%m-%d")_${{ github.event.issue.number }} --title "[QA]${{ env.PR_KEYWORDS }}" --body "$(cat $GITHUB_WORKSPACE/pr_description.json)"
+         PR_URL=$(gh pr view --json url -q .url)
+         echo "PR_URL=$PR_URL" >> $GITHUB_ENV
+        env:
+          GH_TOKEN: ${{ secrets.TESTY }}
+
+
+      - name: Comment on Issue with PR Link
+        if: env.NEW_TAG_KYC || env.NEW_TAG_NOTIFICATION || env.NEW_TAG_BFF
+        run: |
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+          PR_URL=${{ env.PR_URL }}
+          COMMENT_BODY="The release branch has been created and a pull request has been opened: $PR_URL"
+          gh issue comment $ISSUE_NUMBER --body "$COMMENT_BODY"
+        env:
+          GITHUB_TOKEN: ${{ secrets.TESTY }}
