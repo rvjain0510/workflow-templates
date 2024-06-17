@@ -1,8 +1,7 @@
-name: Create AU Release
+name: Create AU Release 
 description: Use this template to push your code to AU environment
 title: "[AU] Deployment of latest code to AU - "
-labels:
-  - au
+labels: [au]
 assignees:
   - your-username
 body:
@@ -13,35 +12,11 @@ body:
       description: You may select more than one.
       options:
         - label: KYC
-          branch_name_field:
-            label: Branch Name
-            description: Enter the branch name for KYC repository
-            placeholder: e.g., main
         - label: HOUSEHOLD
-          branch_name_field:
-            label: Branch Name
-            description: Enter the branch name for HOUSEHOLD repository
-            placeholder: e.g., develop
         - label: DATA
-          branch_name_field:
-            label: Branch Name
-            description: Enter the branch name for DATA repository
-            placeholder: e.g., feature/new-data
         - label: NOTIFICATION
-          branch_name_field:
-            label: Branch Name
-            description: Enter the branch name for NOTIFICATION repository
-            placeholder: e.g., hotfix/notification-fix
         - label: AX360
-          branch_name_field:
-            label: Branch Name
-            description: Enter the branch name for AX360 repository
-            placeholder: e.g., release-v1.0
         - label: BFF
-          branch_name_field:
-            label: Branch Name
-            description: Enter the branch name for BFF repository
-            placeholder: e.g., bugfix/bff-bug-fix
     validations:
       required: true
  
