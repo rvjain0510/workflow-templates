@@ -211,9 +211,6 @@ jobs:
                       # Increment the build version
                       NEW_BUILD=$((BUILD + 1))
                       NEW_TAG="$NAME-$MAJOR.$MINOR.$PATCH.$NEW_BUILD"
-                    else
-                      # Handle other tag patterns if needed
-                      NEW_TAG="$TAG"  # Default if no specific handling is required
                     fi
                     echo "New tag: $NEW_TAG"
       
