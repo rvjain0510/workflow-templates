@@ -177,15 +177,15 @@ jobs:
             echo "Processing $FILE"
             # Extract tags from the YAML file
             TAGS=$(grep -oP 'tag:\s*\K((ax360-[a-z]+-v\d+\.\d+\.\d+)|(iapw-[a-z]+-v\d+\.\d+\.\d+\.\d+))' "$FILE")
-            
+      
             if [ -n "$TAGS" ]; then
               while IFS= read -r TAG; do
                 echo "Extracted tag: $TAG"
-            
+      
                 # Extract NAME and VERSION from the tag
                 NAME=$(echo "$TAG" | cut -d'-' -f1-2)
                 VERSION=$(echo "$TAG" | cut -d'-' -f3-)
-            
+      
                 echo "NAME: $NAME"
                 echo "VERSION: $VERSION"
       
@@ -209,7 +209,7 @@ jobs:
                       MAJOR=${VERSION_PARTS[0]}
                       MINOR=${VERSION_PARTS[1]}
                       PATCH=${VERSION_PARTS[2]}
-                      
+      
                       # Increment the patch version
                       NEW_PATCH=$((PATCH + 1))
                       NEW_TAG="$NAME$MAJOR.$MINOR.$NEW_PATCH"
@@ -220,16 +220,16 @@ jobs:
                       MINOR=${VERSION_PARTS[1]}
                       PATCH=${VERSION_PARTS[2]}
                       BUILD=${VERSION_PARTS[3]}
-                      
+      
                       # Increment the build version
                       NEW_BUILD=$((BUILD + 1))
                       NEW_TAG="$NAME-$MAJOR.$MINOR.$PATCH.$NEW_BUILD"
                     fi
                     echo "New tag: $NEW_TAG"
-                    
+      
                     # Set environment variable for the new tag
                     echo "NEW_TAG_$SHORTHAND=$NEW_TAG" >> $GITHUB_ENV
-                    
+      
                   else
                     echo "Tag $TAG (shorthand $SHORTHAND) is not in the target list."
                   fi
