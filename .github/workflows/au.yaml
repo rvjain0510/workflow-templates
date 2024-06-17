@@ -33,21 +33,21 @@ jobs:
           PR_KEYWORDS=$(echo $EXTRACTED_KEYWORDS | sed 's/\([^ ]*\)/[\1] /g')
 
           # Extracting Source Branch for KYC
-          SOURCE_BRANCH_KYC=$(echo "$ISSUE_BODY" | awk '/### Source Branch for KYC/{flag=1;next}/###/{flag=0}flag' | sed 's/^ *//;s/ *$//')
-          if [[ "$SOURCE_BRANCH_KYC" == *"_No response_"* ]]; then
+          SOURCE_BRANCH_KYC=$(echo "$ISSUE_BODY" | awk '/### Source Branch for KYC/{flag=1;next}/###/{flag=0}flag' | sed '/^$/d')
+          if [[ "$SOURCE_BRANCH_KYC" == "_No response_" ]]; then
             SOURCE_BRANCH_KYC=""
           fi
 
           # Extracting Source Branch for Notification
-          SOURCE_BRANCH_NOTIFICATION=$(echo "$ISSUE_BODY" | awk '/### Source Branch for Notification/{flag=1;next}/###/{flag=0}flag' | sed 's/^ *//;s/ *$//')
-          if [[ "$SOURCE_BRANCH_NOTIFICATION" == *"_No response_"* ]]; then
+          SOURCE_BRANCH_NOTIFICATION=$(echo "$ISSUE_BODY" | awk '/### Source Branch for Notification/{flag=1;next}/###/{flag=0}flag' | sed '/^$/d')
+          if [[ "$SOURCE_BRANCH_NOTIFICATION" == "_No response_" ]]; then
             SOURCE_BRANCH_NOTIFICATION=""
           fi
 
           echo "Extracted PR_DESCRIPTION: $PR_DESCRIPTION"
           echo "Extracted EXTRACTED_KEYWORDS: $EXTRACTED_KEYWORDS"
-          echo "Extracted SOURCE_BRANCH_KYC: $SOURCE_BRANCH_KYC"
-          echo "Extracted SOURCE_BRANCH_NOTIFICATION: $SOURCE_BRANCH_NOTIFICATION"
+          echo "Extracted SOURCE_BRANCH_KYC: '$SOURCE_BRANCH_KYC'"
+          echo "Extracted SOURCE_BRANCH_NOTIFICATION: '$SOURCE_BRANCH_NOTIFICATION'"
 
           # Set environment variables
           echo "$PR_DESCRIPTION" > $GITHUB_WORKSPACE/pr_description.json
@@ -63,6 +63,7 @@ jobs:
           if [ -n "$SOURCE_BRANCH_NOTIFICATION" ]; then
             echo "SOURCE_BRANCH_NOTIFICATION=$SOURCE_BRANCH_NOTIFICATION" >> $GITHUB_ENV
           fi
+
 
       - name: Print extracted variables
         run: |
